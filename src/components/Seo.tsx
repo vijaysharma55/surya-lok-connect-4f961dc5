@@ -6,11 +6,15 @@ interface SeoProps {
   description: string;
   path?: string;
   image?: string;
+  ogImage?: string;
+  canonical?: string;
+  noIndex?: boolean;
 }
 
-export const Seo = ({ title, description, path = "/", image }: SeoProps) => {
+export const Seo = ({ title, description, path = "/", image, ogImage, canonical, noIndex }: SeoProps) => {
   const fullTitle = title.includes(SITE.shortName) ? title : `${title} | ${SITE.name}`;
-  const url = `${SITE.url}${path}`;
+  const url = canonical ?? `${SITE.url}${path}`;
+  const og = ogImage ?? image;
   return (
     <Helmet>
       <title>{fullTitle}</title>
@@ -20,8 +24,8 @@ export const Seo = ({ title, description, path = "/", image }: SeoProps) => {
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content="website" />
-      {image && <meta property="og:image" content={image} />}
-      <meta name="twitter:card" content="summary_large_image" />
+      {og && <meta property="og:image" content={og} />}
+      {noIndex && <meta name="robots" content="noindex,nofollow" />}
     </Helmet>
   );
 };

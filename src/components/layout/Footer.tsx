@@ -76,7 +76,10 @@ export const Footer = () => {
       <div className="border-t border-background/10">
         <div className="container-tight py-4 text-xs text-background/60 flex flex-col sm:flex-row gap-2 justify-between">
           <span>© {new Date().getFullYear()} {SITE.name}. All rights reserved.</span>
-          <span>Designed for transparency & impact.</span>
+          <span className="flex gap-3">
+            <span>Designed for transparency & impact.</span>
+            <Link to="/auth" className="opacity-60 hover:opacity-100 hover:text-primary">Admin</Link>
+          </span>
         </div>
       </div>
     </footer>
