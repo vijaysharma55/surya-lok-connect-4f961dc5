@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${uid}` },
-          () => scheduleReload({ refreshSession: true })
+          () => scheduleReload({ refreshSession: true, reason: "user_roles change" })
         )
         .subscribe();
 
@@ -140,7 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "coordinator_assignments", filter: `user_id=eq.${uid}` },
-          () => scheduleReload()
+          () => scheduleReload({ reason: "coordinator_assignments change" })
         )
         .subscribe();
     };
