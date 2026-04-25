@@ -53,12 +53,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
+      // Force a refresh so we always pick up the latest role assignments
       if (s?.user) {
-        loadRolesFor(s.user.id).finally(() => setLoading(false));
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        const cur = refreshed.session ?? s;
+        setSession(cur);
+        setUser(cur.user ?? null);
+        await loadRolesFor(cur.user!.id);
+        setLoading(false);
       } else {
+        setSession(null);
+        setUser(null);
         setLoading(false);
       }
     });
