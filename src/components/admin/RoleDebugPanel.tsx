@@ -17,9 +17,26 @@ const fmt = (ts: number) => {
   return `${d.toLocaleTimeString()}.${String(d.getMilliseconds()).padStart(3, "0")}`;
 };
 
+const FLAG_KEY = "slkf_role_debug";
+
+const isDebugEnabled = () => {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("debug") === "roles") {
+    sessionStorage.setItem(FLAG_KEY, "1");
+    return true;
+  }
+  if (params.get("debug") === "off") {
+    sessionStorage.removeItem(FLAG_KEY);
+    return false;
+  }
+  return sessionStorage.getItem(FLAG_KEY) === "1";
+};
+
 export const RoleDebugPanel = () => {
-  // Hard guard: only render in dev builds
+  // Dev-only AND requires explicit ?debug=roles flag (sticky for the session)
   if (!import.meta.env.DEV) return null;
+  if (!isDebugEnabled()) return null;
 
   const [events, setEvents] = useState<RoleDebugEvent[]>([]);
   const [open, setOpen] = useState(true);
