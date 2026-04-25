@@ -75,11 +75,12 @@ const Home = () => {
               <Sun className="h-3.5 w-3.5" /> 80G • 12A • 10AC Registered
             </span>
             <h1 className="font-hindi text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight drop-shadow-lg">
-              ☀️ सूरज की रोशनी से<br />समाज की रोशनी तक
+              {heroHeading ? heroHeading : (<>☀️ सूरज की रोशनी से<br />समाज की रोशनी तक</>)}
             </h1>
             <p className="mt-5 text-base sm:text-lg text-white/95 max-w-xl leading-relaxed">
-              CSR Projects | Solar Energy | Property Solutions —{" "}
-              <span className="font-hindi">सब एक छत के नीचे</span>
+              {heroSubheading || (
+                <>CSR Projects | Solar Energy | Property Solutions — <span className="font-hindi">सब एक छत के नीचे</span></>
+              )}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button
@@ -87,8 +88,8 @@ const Home = () => {
                 size="lg"
                 className="bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))] font-semibold shadow-warm"
               >
-                <Link to="/contact">
-                  <span className="font-hindi">हमसे जुड़ें</span>
+                <Link to={heroCtaLink || "/contact"}>
+                  <span className="font-hindi">{heroCtaLabel || "हमसे जुड़ें"}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
