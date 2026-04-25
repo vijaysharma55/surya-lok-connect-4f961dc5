@@ -343,7 +343,8 @@ export default function Apply() {
                     accept="image/*"
                     file={screenshotFile}
                     onChange={setScreenshotFile}
-                    hint="Upload UPI/payment app screenshot"
+                    maxSizeMB={5}
+                    hint="UPI/payment app screenshot, up to 5 MB."
                   />
                 </div>
               </div>
