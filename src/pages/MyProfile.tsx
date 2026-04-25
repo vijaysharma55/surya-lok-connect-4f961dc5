@@ -22,7 +22,7 @@ type Application = {
   block: string;
   panchayat: string;
   post: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "active" | "rejected" | string;
   photo_url: string | null;
   admin_notes: string | null;
   approved_at: string | null;
