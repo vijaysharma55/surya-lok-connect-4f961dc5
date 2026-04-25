@@ -19,7 +19,15 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Search, Eye, Check, X, Trash2, FileSpreadsheet, Loader2, AlertTriangle } from "lucide-react";
+import { Search, Eye, Check, X, Trash2, FileSpreadsheet, Loader2, AlertTriangle, ScanLine, ZoomIn } from "lucide-react";
+
+const AADHAAR_REJECT_REASONS = [
+  "Aadhaar image is blurry / unreadable",
+  "Aadhaar number does not match submitted value",
+  "Name on Aadhaar does not match application",
+  "Aadhaar image appears tampered or invalid",
+  "Wrong document uploaded (not an Aadhaar)",
+];
 
 type Application = {
   id: string;
@@ -80,6 +88,10 @@ export default function AdminApplications() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewing, setViewing] = useState<Application | null>(null);
   const [notes, setNotes] = useState("");
+  const [aadhaarVerifying, setAadhaarVerifying] = useState<Application | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectMode, setRejectMode] = useState(false);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
   const debouncedQ = useDebounced(q);
@@ -152,6 +164,9 @@ export default function AdminApplications() {
     if (error) return toast.error(error.message);
     toast.success(`Application ${status}`);
     setViewing(null);
+    setAadhaarVerifying(null);
+    setRejectMode(false);
+    setRejectReason("");
     setItems((p) => p.map((a) => (a.id === id ? { ...a, status, admin_notes: patch.admin_notes ?? a.admin_notes } : a)));
   };
 
@@ -333,8 +348,11 @@ export default function AdminApplications() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => { setViewing(a); setNotes(a.admin_notes ?? ""); }}>
+                          <Button variant="ghost" size="sm" title="View" onClick={() => { setViewing(a); setNotes(a.admin_notes ?? ""); }}>
                             <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Verify Aadhaar" onClick={() => { setAadhaarVerifying(a); setNotes(a.admin_notes ?? ""); setRejectReason(""); setRejectMode(false); }}>
+                            <ScanLine className="h-4 w-4 text-blue-600" />
                           </Button>
                           <Button variant="ghost" size="sm" disabled={busyId === a.id} onClick={() => updateStatus(a.id, "active")}>
                             <Check className="h-4 w-4 text-green-600" />
@@ -434,6 +452,115 @@ export default function AdminApplications() {
               </>
             )}
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Aadhaar verification dialog */}
+      <Dialog open={!!aadhaarVerifying} onOpenChange={(o) => { if (!o) { setAadhaarVerifying(null); setRejectMode(false); setRejectReason(""); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ScanLine className="h-5 w-5 text-blue-600" />
+              Aadhaar Verification — {aadhaarVerifying?.application_code}
+            </DialogTitle>
+            <DialogDescription>
+              Compare the uploaded Aadhaar image with the submitted Aadhaar number. Approve if it matches, or reject with a clear mismatch reason.
+            </DialogDescription>
+          </DialogHeader>
+          {aadhaarVerifying && (
+            <div className="space-y-4 text-sm">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Detail label="Applicant" value={aadhaarVerifying.full_name} />
+                <Detail label="Submitted Aadhaar" value={aadhaarVerifying.aadhaar} mono />
+              </div>
+
+              <div>
+                <div className="text-xs text-muted-foreground mb-1 flex items-center justify-between">
+                  <span>Uploaded Aadhaar image</span>
+                  {aadhaarVerifying.aadhaar_image_url && (
+                    <button type="button" onClick={() => setZoomImg(aadhaarVerifying.aadhaar_image_url!)} className="text-blue-600 inline-flex items-center gap-1 hover:underline">
+                      <ZoomIn className="h-3 w-3" /> Zoom
+                    </button>
+                  )}
+                </div>
+                {aadhaarVerifying.aadhaar_image_url ? (
+                  <a href={aadhaarVerifying.aadhaar_image_url} target="_blank" rel="noopener" className="block">
+                    <img loading="lazy" src={aadhaarVerifying.aadhaar_image_url} alt="Aadhaar document" className="rounded border max-h-96 w-full object-contain bg-muted" />
+                  </a>
+                ) : (
+                  <div className="rounded border bg-muted p-8 text-center text-xs text-muted-foreground">
+                    No Aadhaar image uploaded by applicant.
+                  </div>
+                )}
+              </div>
+
+              {rejectMode ? (
+                <div className="space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                  <div className="text-xs font-medium text-destructive">Select a mismatch reason (required)</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {AADHAAR_REJECT_REASONS.map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRejectReason(r)}
+                        className={`text-xs px-2 py-1 rounded border transition ${rejectReason === r ? "bg-destructive text-destructive-foreground border-destructive" : "bg-background hover:bg-muted"}`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                  <Textarea
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    rows={2}
+                    maxLength={500}
+                    placeholder="Or write a custom reason…"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Admin notes (optional)</div>
+                  <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} maxLength={500} />
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter className="gap-2 flex-wrap">
+            {aadhaarVerifying && !rejectMode && (
+              <>
+                <Button variant="outline" onClick={() => { setAadhaarVerifying(null); }}>Cancel</Button>
+                <Button variant="destructive" onClick={() => setRejectMode(true)}>
+                  <X className="h-4 w-4" /> Reject…
+                </Button>
+                <Button
+                  disabled={busyId === aadhaarVerifying.id || !aadhaarVerifying.aadhaar_image_url}
+                  onClick={() => updateStatus(aadhaarVerifying.id, "verified", notes ? `Aadhaar verified. ${notes}` : "Aadhaar verified")}
+                  className="bg-green-600 text-white hover:bg-green-700"
+                >
+                  {busyId === aadhaarVerifying.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Approve Aadhaar
+                </Button>
+              </>
+            )}
+            {aadhaarVerifying && rejectMode && (
+              <>
+                <Button variant="outline" onClick={() => { setRejectMode(false); setRejectReason(""); }}>Back</Button>
+                <Button
+                  variant="destructive"
+                  disabled={busyId === aadhaarVerifying.id || rejectReason.trim().length < 3}
+                  onClick={() => updateStatus(aadhaarVerifying.id, "rejected", `Aadhaar rejected: ${rejectReason.trim()}`)}
+                >
+                  {busyId === aadhaarVerifying.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />} Confirm Reject
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image zoom */}
+      <Dialog open={!!zoomImg} onOpenChange={(o) => !o && setZoomImg(null)}>
+        <DialogContent className="max-w-5xl p-2">
+          {zoomImg && <img src={zoomImg} alt="Aadhaar zoom" className="w-full max-h-[85vh] object-contain" />}
         </DialogContent>
       </Dialog>
     </AdminLayout>
