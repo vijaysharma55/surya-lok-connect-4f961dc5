@@ -31,14 +31,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [coordinatorDistricts, setCoordinatorDistricts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadRolesFor = async (uid: string) => {
+  const loadRolesFor = async (uid: string, opts?: { refreshSession?: boolean }) => {
+    if (opts?.refreshSession) {
+      await supabase.auth.refreshSession();
+    }
     const [roleRes, assignRes] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
       supabase.from("coordinator_assignments").select("district").eq("user_id", uid),
     ]);
-    setIsAdmin(!!roleRes.data);
-    const districts = Array.from(new Set((assignRes.data ?? []).map((r: any) => r.district as string)));
-    setCoordinatorDistricts(districts);
+    const nextIsAdmin = !!roleRes.data;
+    const nextDistricts = Array.from(new Set((assignRes.data ?? []).map((r: any) => r.district as string))).sort();
+    // Only update state if values actually changed (prevents flicker)
+    setIsAdmin((prev) => (prev === nextIsAdmin ? prev : nextIsAdmin));
+    setCoordinatorDistricts((prev) => {
+      if (prev.length === nextDistricts.length && prev.every((d, i) => d === nextDistricts[i])) return prev;
+      return nextDistricts;
+    });
   };
 
   useEffect(() => {
