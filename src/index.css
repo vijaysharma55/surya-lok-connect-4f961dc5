@@ -1,96 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Noto+Sans+Devanagari:wght@500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/*
+  Surya Lok Kalyan Foundation — Design System
+  All colors in HSL. Brand: Yellow #FFC107, Green #2E7D32, Dark Blue #000080, Cream #FFFDD0.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand palette in HSL */
+    --background: 60 100% 91%;          /* #FFFDD0 cream */
+    --background-soft: 60 100% 96%;     /* lighter cream surface */
+    --foreground: 240 100% 25%;         /* #000080 dark blue */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 100% 25%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 240 100% 25%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 45 100% 51%;             /* #FFC107 yellow */
+    --primary-foreground: 240 100% 20%; /* dark blue text on yellow */
+    --primary-hover: 42 100% 47%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 123 46% 34%;           /* #2E7D32 green */
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 123 46% 28%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 60 60% 88%;                /* muted cream */
+    --muted-foreground: 240 25% 35%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 100% 88%;              /* light yellow accent */
+    --accent-foreground: 240 100% 25%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 45 50% 80%;
+    --input: 45 50% 85%;
+    --ring: 45 100% 51%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Brand gradients */
+    --gradient-sun: linear-gradient(135deg, hsl(45 100% 60%), hsl(38 100% 50%));
+    --gradient-warm: linear-gradient(180deg, hsl(45 100% 95%), hsl(60 100% 91%));
+    --gradient-trust: linear-gradient(135deg, hsl(123 46% 34%), hsl(123 50% 28%));
+    --gradient-hero-overlay: linear-gradient(180deg, hsla(240, 100%, 15%, 0.15) 0%, hsla(240, 100%, 15%, 0.65) 100%);
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Shadows */
+    --shadow-warm: 0 10px 30px -10px hsl(45 100% 40% / 0.35);
+    --shadow-trust: 0 8px 24px -8px hsl(240 100% 25% / 0.18);
+    --shadow-card: 0 4px 16px -4px hsl(240 50% 30% / 0.08);
+    --shadow-lg: 0 20px 50px -15px hsl(240 100% 20% / 0.25);
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar (kept for shadcn) */
+    --sidebar-background: 60 100% 96%;
+    --sidebar-foreground: 240 100% 25%;
+    --sidebar-primary: 45 100% 51%;
+    --sidebar-primary-foreground: 240 100% 20%;
+    --sidebar-accent: 60 60% 88%;
+    --sidebar-accent-foreground: 240 100% 25%;
+    --sidebar-border: 45 50% 80%;
+    --sidebar-ring: 45 100% 51%;
   }
 }
 
@@ -99,7 +74,52 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'Noto Sans Devanagari', system-ui, sans-serif;
+    @apply font-semibold tracking-tight;
+  }
+
+  .font-hindi {
+    font-family: 'Noto Sans Devanagari', 'Poppins', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .gradient-sun { background: var(--gradient-sun); }
+  .gradient-warm { background: var(--gradient-warm); }
+  .gradient-trust { background: var(--gradient-trust); }
+  .shadow-warm { box-shadow: var(--shadow-warm); }
+  .shadow-trust { box-shadow: var(--shadow-trust); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+
+  .container-tight {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.6s ease-out both;
+  }
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out both;
+  }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
