@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Seo } from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, CheckCircle2, XCircle, Search, IdCard, Download } from "lucide-react";
+import { Clock, CheckCircle2, XCircle, Search, IdCard, DownloadCloud, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SunLogo } from "@/components/SunLogo";
+import { IDCard as IDCardTemplate } from "@/components/IDCard";
+import { generateIdCardPDF, safeFileName } from "@/lib/generatePDF";
 
 type Application = {
   id: string;
