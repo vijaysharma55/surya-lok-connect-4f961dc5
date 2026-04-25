@@ -71,6 +71,15 @@ export default function MyProfile() {
     return () => { cancel = true; };
   }, [user, authLoading]);
 
+  const celebrated = useRef(false);
+  useEffect(() => {
+    if (!app || celebrated.current) return;
+    if ((app.status === "active" || app.status === "approved") && !app.id_card_downloaded_at) {
+      celebrated.current = true;
+      try { fireConfetti(); } catch { /* noop */ }
+    }
+  }, [app]);
+
   if (authLoading) return null;
   if (!user) return <Navigate to="/auth?redirect=/my-profile" replace />;
 
