@@ -296,8 +296,8 @@ const Home = () => {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))]"
             >
-              <a href={telLink()}>
-                <Phone className="h-5 w-5" /> Call {SITE.phones[0]}
+              <a href={telLink(phones[0])}>
+                <Phone className="h-5 w-5" /> Call {phones[0]}
               </a>
             </Button>
             <Button
@@ -306,7 +306,7 @@ const Home = () => {
               variant="outline"
               className="bg-white/10 border-white text-white hover:bg-white hover:text-foreground"
             >
-              <a href={waLink("Hi SLKF, I'd like to discuss a project.")} target="_blank" rel="noopener">
+              <a href={waHref("Hi SLKF, I'd like to discuss a project.")} target="_blank" rel="noopener">
                 <MessageCircle className="h-5 w-5" /> WhatsApp Us
               </a>
             </Button>
