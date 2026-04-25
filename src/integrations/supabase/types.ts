@@ -178,6 +178,33 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          file_url: string
+          id: string
+          storage_path: string | null
+          title: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          id?: string
+          storage_path?: string | null
+          title: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          id?: string
+          storage_path?: string | null
+          title?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
