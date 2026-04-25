@@ -30,7 +30,18 @@ type Application = {
   admin_notes: string | null;
   approved_at: string | null;
   created_at: string;
+  id_card_downloaded_at?: string | null;
 };
+
+function fireConfetti() {
+  const end = Date.now() + 800;
+  const colors = ["#f59e0b", "#ef4444", "#16a34a", "#ffffff"];
+  (function frame() {
+    confetti({ particleCount: 4, angle: 60, spread: 70, origin: { x: 0 }, colors });
+    confetti({ particleCount: 4, angle: 120, spread: 70, origin: { x: 1 }, colors });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+}
 
 export default function MyProfile() {
   const { user, loading: authLoading, signOut } = useAuth();
