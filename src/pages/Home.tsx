@@ -11,11 +11,13 @@ import {
   Eye,
   ArrowRight,
 } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ServiceCard } from "@/components/ServiceCard";
 import { SITE, telLink, waLink } from "@/lib/site";
+import { useSiteSettings, usePublishedServices } from "@/hooks/useCms";
 
 import heroImg from "@/assets/hero-sunrise.jpg";
 import csrImg from "@/assets/service-csr.jpg";
@@ -30,7 +32,21 @@ import g6 from "@/assets/property-plot.jpg";
 import g7 from "@/assets/property-farmhouse.jpg";
 import g8 from "@/assets/team.jpg";
 
+const slugFallback: Record<string, string> = { csr: csrImg, solar: solarImg, property: propertyImg };
+
 const Home = () => {
+  const settings = useSiteSettings();
+  const services = usePublishedServices();
+  const phones = settings?.phones?.length ? settings.phones : SITE.phones;
+  const heroImage = settings?.hero_image_url || heroImg;
+  const heroHeading = settings?.hero_heading;
+  const heroSubheading = settings?.hero_subheading;
+  const heroCtaLabel = settings?.hero_cta_label;
+  const heroCtaLink = settings?.hero_cta_link;
+  const waNumber = settings?.whatsapp_number;
+  const waHref = (msg: string) =>
+    waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}` : waLink(msg);
+
   return (
     <>
       <Seo
@@ -42,7 +58,7 @@ const Home = () => {
       {/* HERO */}
       <section className="relative isolate overflow-hidden">
         <img
-          src={heroImg}
+          src={heroImage}
           alt="Indian village sunrise with rooftop solar panels and farmers"
           width={1920}
           height={1080}
