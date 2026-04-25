@@ -1,6 +1,7 @@
 import { HandHeart, Sun, Home as HomeIcon } from "lucide-react";
 import * as Icons from "lucide-react";
 import { Seo } from "@/components/Seo";
+import { breadcrumbJsonLd, serviceJsonLd } from "@/lib/jsonld";
 import { ServiceCard } from "@/components/ServiceCard";
 import csrImg from "@/assets/service-csr.jpg";
 import solarImg from "@/assets/service-solar.jpg";
