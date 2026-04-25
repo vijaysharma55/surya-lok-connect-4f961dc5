@@ -14,6 +14,7 @@ import {
 import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
+import { orgJsonLd, websiteJsonLd } from "@/lib/jsonld";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ServiceCard } from "@/components/ServiceCard";
 import { SITE, telLink, waLink } from "@/lib/site";
