@@ -29,11 +29,13 @@ type Props = {
  * to PDF via html2canvas + jsPDF on download.
  */
 export const IDCard = forwardRef<HTMLDivElement, Props>(
-  ({ data, emergencyContact = "+91 90000 00000", validUntil }, ref) => {
+  ({ data, emergencyContact = "+91 90000 00000", validUntil, verifyUrl }, ref) => {
     const issued = data.approved_at ? new Date(data.approved_at) : new Date();
     const validity =
       validUntil ??
       new Date(issued.getFullYear() + 1, issued.getMonth(), issued.getDate()).toLocaleDateString("en-IN");
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const qrValue = verifyUrl ?? `${origin}/verify/${data.application_code}`;
 
     return (
       <div
