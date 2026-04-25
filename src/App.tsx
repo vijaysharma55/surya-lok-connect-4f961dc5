@@ -39,6 +39,7 @@ import AdminMedia from "./pages/admin/Media";
 import AdminSeo from "./pages/admin/Seo";
 import AdminHeaderFooter from "./pages/admin/HeaderFooter";
 import AdminSettings from "./pages/admin/Settings";
+import AdminDocuments from "./pages/admin/Documents";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +80,7 @@ const Shell = () => {
           <Route path="/admin/seo" element={<AdminSeo />} />
           <Route path="/admin/header-footer" element={<AdminHeaderFooter />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/documents" element={<AdminDocuments />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

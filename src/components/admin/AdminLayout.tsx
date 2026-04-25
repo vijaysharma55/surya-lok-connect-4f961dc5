@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   ExternalLink,
+  FileArchive,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { RoleDebugPanel } from "@/components/admin/RoleDebugPanel";
@@ -44,6 +45,7 @@ const allItems = [
   { title: "SEO", url: "/admin/seo", icon: Search, adminOnly: true },
   { title: "Header & Footer", url: "/admin/header-footer", icon: PanelTop, adminOnly: true },
   { title: "Settings", url: "/admin/settings", icon: Settings, adminOnly: true },
+  { title: "Documents", url: "/admin/documents", icon: FileArchive, adminOnly: true },
 ];
 
 function AdminSidebar() {
