@@ -10,7 +10,8 @@ import { Clock, CheckCircle2, XCircle, IdCard, DownloadCloud, Loader2, LogOut, M
 import { toast } from "sonner";
 import { SunLogo } from "@/components/SunLogo";
 import { IDCard as IDCardTemplate } from "@/components/IDCard";
-import { generateIdCardPDF, safeFileName } from "@/lib/generatePDF";
+import { generateIdCardPDF, generateIdCardPNG, safeFileName } from "@/lib/generatePDF";
+import confetti from "canvas-confetti";
 import { maskAadhaar } from "@/lib/mask";
 
 type Application = {
