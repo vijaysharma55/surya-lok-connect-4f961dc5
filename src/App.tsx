@@ -22,9 +22,12 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Membership from "./pages/Membership";
+import Apply from "./pages/Apply";
+import MyProfile from "./pages/MyProfile";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
 import AdminMembers from "./pages/admin/Members";
+import AdminApplications from "./pages/admin/Applications";
 import AdminServices from "./pages/admin/Services";
 import AdminProjects from "./pages/admin/Projects";
 import AdminPages from "./pages/admin/Pages";
@@ -54,9 +57,12 @@ const Shell = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/membership" element={<Membership />} />
           <Route path="/join-us" element={<Membership />} />
+          <Route path="/apply" element={<Apply />} />
+          <Route path="/my-profile" element={<MyProfile />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/members" element={<AdminMembers />} />
+          <Route path="/admin/applications" element={<AdminApplications />} />
           <Route path="/admin/leads" element={<AdminLeads />} />
           <Route path="/admin/services" element={<AdminServices />} />
           <Route path="/admin/projects" element={<AdminProjects />} />
