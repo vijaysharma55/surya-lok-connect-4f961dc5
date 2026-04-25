@@ -180,11 +180,22 @@ function VolunteerCard({ app }: { app: Application }) {
       <Button
         onClick={handleDownload}
         disabled={downloading}
-        className="mt-4 w-full sm:w-auto"
+        aria-busy={downloading}
+        aria-live="polite"
+        className="mt-4 w-full sm:w-auto gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         size="lg"
       >
-        {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <DownloadCloud className="h-4 w-4" />}
-        {downloading ? "Generating PDF…" : "Download Volunteer ID (PDF)"}
+        {downloading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            <span>Generating PDF…</span>
+          </>
+        ) : (
+          <>
+            <DownloadCloud className="h-4 w-4" aria-hidden />
+            <span>Download Volunteer ID (PDF)</span>
+          </>
+        )}
       </Button>
 
       <Card className="mt-4 overflow-hidden border-2 border-primary/40 shadow-warm">
