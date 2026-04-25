@@ -46,8 +46,7 @@ export const Header = () => {
             )}
             <span className="font-semibold text-foreground text-sm truncate">{siteName}</span>
           </Link>
-          {/* Spacer to balance hamburger so logo stays visually centered */}
-          <div className="w-9 shrink-0" aria-hidden />
+          <InstallAppButton variant="ghost" size="sm" className="px-2" />
         </div>
       </header>
 
