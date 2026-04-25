@@ -104,7 +104,7 @@ export default function MyProfile() {
         {app && (
           <div className="max-w-2xl mx-auto mt-8">
             <StatusCard status={app.status} notes={app.admin_notes} />
-            {app.status === "approved" ? (
+            {app.status === "approved" || app.status === "active" ? (
               <VolunteerCard app={app} />
             ) : (
               <Card className="mt-4">
