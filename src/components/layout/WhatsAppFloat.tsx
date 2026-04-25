@@ -14,7 +14,7 @@ export const WhatsAppFloat = () => {
       target="_blank"
       rel="noopener"
       aria-label="Chat on WhatsApp"
-      className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[hsl(123_46%_34%)] text-white shadow-warm hover:scale-110 transition-transform"
+      className="fixed right-4 z-40 flex h-14 w-14 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-[hsl(123_46%_34%)] text-white shadow-warm hover:scale-110 transition-transform bottom-[calc(env(safe-area-inset-bottom)+76px)] md:bottom-5 md:right-5"
     >
       <MessageCircle className="h-7 w-7" />
       <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary animate-pulse" />
