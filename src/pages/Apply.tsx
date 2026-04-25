@@ -121,6 +121,23 @@ export default function Apply() {
     }
     setSubmitting(true);
     try {
+      // Pre-submission duplicate check (mobile or Aadhaar already active)
+      const { data: dup, error: dupErr } = await supabase
+        .from("applications")
+        .select("id, status, mobile, aadhaar")
+        .or(`mobile.eq.${parsed.data.mobile},aadhaar.eq.${parsed.data.aadhaar}`)
+        .in("status", ["pending", "approved", "verified", "active"])
+        .limit(1);
+      if (dupErr) throw dupErr;
+      if (dup && dup.length > 0) {
+        const which = dup[0].mobile === parsed.data.mobile ? "mobile number" : "Aadhaar";
+        toast.error(
+          `This ${which} is already registered. Please check your status in 'Track Application'.`
+        );
+        setSubmitting(false);
+        return;
+      }
+
       const screenshot_url = await uploadToMedia(screenshotFile, "screenshot");
       let photo_url: string | null = null;
       if (photoFile) photo_url = await uploadToMedia(photoFile, "photo");
