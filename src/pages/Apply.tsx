@@ -173,7 +173,14 @@ export default function Apply() {
       setAadhaarFile(null);
       setScreenshotFile(null);
     } catch (err: any) {
-      toast.error(err.message ?? "Submission failed");
+      // Postgres unique violation fallback (race condition / DB-level guard)
+      if (err?.code === "23505") {
+        toast.error(
+          "Duplicate detected. This mobile or Aadhaar is already registered. Please check 'Track Application'."
+        );
+      } else {
+        toast.error(err.message ?? "Submission failed");
+      }
     } finally {
       setSubmitting(false);
     }
