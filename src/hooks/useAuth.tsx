@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(s?.user ?? null);
       if (s?.user) {
         currentUid = s.user.id;
-        setTimeout(() => scheduleReload({ immediate: true }), 0);
+        setTimeout(() => scheduleReload({ immediate: true, reason: "auth state change" }), 0);
         subscribeForUser(s.user.id);
       } else {
         currentUid = null;
