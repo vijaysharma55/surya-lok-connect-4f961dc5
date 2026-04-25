@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { SITE, waLink } from "@/lib/site";
+import { supabase } from "@/integrations/supabase/client";
 
 const schema = z.object({
   name: z
@@ -44,7 +45,19 @@ export const ContactForm = () => {
     defaultValues: { name: "", phone: "", service: undefined, message: "" },
   });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
+    // 1. Save lead (best-effort; do not block WhatsApp on failure)
+    const { error } = await supabase.from("leads").insert({
+      name: data.name,
+      phone: `+91${data.phone}`,
+      service: data.service,
+      message: data.message,
+      source: "website",
+    });
+    if (error) {
+      console.error("Lead save failed", error);
+    }
+    // 2. Open WhatsApp with prefilled text
     const text = `Hello ${SITE.shortName},
 
 Name: ${data.name}
@@ -54,8 +67,8 @@ Interested in: ${data.service}
 ${data.message}`;
     window.open(waLink(text), "_blank", "noopener");
     toast({
-      title: "Opening WhatsApp…",
-      description: "Send the message to complete your enquiry.",
+      title: "Thank you! Opening WhatsApp…",
+      description: "Your enquiry has been recorded. Send the message to complete it.",
     });
     form.reset();
   };
