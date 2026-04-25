@@ -5,8 +5,9 @@ import { SITE, telLink, waLink } from "@/lib/site";
 import { SunLogo } from "@/components/SunLogo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/useCms";
 
-const navItems = [
+const defaultNav = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/services", label: "Services" },
@@ -16,6 +17,18 @@ const navItems = [
 
 export const Header = () => {
   const [open, setOpen] = useState(false);
+  const settings = useSiteSettings();
+  const navItems = settings?.nav_links?.length ? settings.nav_links : defaultNav;
+  const siteName = settings?.site_name || SITE.name;
+  const tagline = settings?.brand_tagline || "CSR • Solar • Property — Mithapur, Patna";
+  const phones = settings?.phones?.length ? settings.phones : SITE.phones;
+  const email = settings?.email || SITE.email;
+  const compliance = settings?.compliance?.length ? settings.compliance : SITE.compliance;
+  const logoUrl = settings?.logo_url;
+  const waNumber = settings?.whatsapp_number;
+  const waHref = waNumber
+    ? `https://wa.me/${waNumber}?text=${encodeURIComponent("Hello SLKF, I'd like to know more about your services.")}`
+    : waLink("Hello SLKF, I'd like to know more about your services.");
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border shadow-card">
@@ -23,7 +36,7 @@ export const Header = () => {
       <div className="hidden md:block bg-foreground text-background">
         <div className="container-tight flex items-center justify-between py-1.5 text-xs">
           <div className="flex items-center gap-3">
-            {SITE.compliance.map((c) => (
+            {compliance.map((c) => (
               <span
                 key={c}
                 className="rounded-sm bg-primary/20 px-2 py-0.5 font-medium text-primary"
@@ -35,16 +48,16 @@ export const Header = () => {
           </div>
           <div className="flex items-center gap-4">
             <a
-              href={telLink()}
+              href={telLink(phones[0])}
               className="flex items-center gap-1.5 hover:text-primary transition"
             >
-              <Phone className="h-3.5 w-3.5" /> {SITE.phones[0]} / {SITE.phones[1]}
+              <Phone className="h-3.5 w-3.5" /> {phones[0]}{phones[1] ? ` / ${phones[1]}` : ""}
             </a>
             <a
-              href={`mailto:${SITE.email}`}
+              href={`mailto:${email}`}
               className="hover:text-primary transition"
             >
-              {SITE.email}
+              {email}
             </a>
           </div>
         </div>
@@ -53,13 +66,17 @@ export const Header = () => {
       {/* Main bar */}
       <div className="container-tight flex items-center justify-between py-3">
         <Link to="/" className="flex items-center gap-3 group">
-          <SunLogo size={42} className="transition-transform group-hover:rotate-45 duration-500" />
+          {logoUrl ? (
+            <img src={logoUrl} alt={siteName} className="h-10 w-10 rounded object-contain" />
+          ) : (
+            <SunLogo size={42} className="transition-transform group-hover:rotate-45 duration-500" />
+          )}
           <div className="leading-tight">
             <div className="font-semibold text-base sm:text-lg text-foreground">
-              Surya Lok Kalyan Foundation
+              {siteName}
             </div>
             <div className="text-[11px] sm:text-xs text-muted-foreground font-medium">
-              CSR • Solar • Property — Mithapur, Patna
+              {tagline}
             </div>
           </div>
         </Link>
@@ -90,7 +107,7 @@ export const Header = () => {
             size="sm"
             className="hidden sm:inline-flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
           >
-            <a href={telLink()}>
+            <a href={telLink(phones[0])}>
               <Phone className="h-4 w-4" /> Call
             </a>
           </Button>
@@ -100,7 +117,7 @@ export const Header = () => {
             className="bg-secondary text-secondary-foreground hover:bg-[hsl(var(--secondary-hover))]"
           >
             <a
-              href={waLink("Hello SLKF, I'd like to know more about your services.")}
+              href={waHref}
               target="_blank"
               rel="noopener"
             >
@@ -154,23 +171,20 @@ export const Header = () => {
                 ))}
               </nav>
               <div className="mt-6 space-y-2 border-t border-border pt-4">
+                {phones.map((p) => (
+                  <a
+                    key={p}
+                    href={telLink(p)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent"
+                  >
+                    <Phone className="h-4 w-4 text-secondary" /> {p}
+                  </a>
+                ))}
                 <a
-                  href={telLink(SITE.phones[0])}
-                  className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent"
-                >
-                  <Phone className="h-4 w-4 text-secondary" /> {SITE.phones[0]}
-                </a>
-                <a
-                  href={telLink(SITE.phones[1])}
-                  className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent"
-                >
-                  <Phone className="h-4 w-4 text-secondary" /> {SITE.phones[1]}
-                </a>
-                <a
-                  href={`mailto:${SITE.email}`}
+                  href={`mailto:${email}`}
                   className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent break-all"
                 >
-                  {SITE.email}
+                  {email}
                 </a>
               </div>
             </SheetContent>

@@ -11,11 +11,13 @@ import {
   Eye,
   ArrowRight,
 } from "lucide-react";
+import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ServiceCard } from "@/components/ServiceCard";
 import { SITE, telLink, waLink } from "@/lib/site";
+import { useSiteSettings, usePublishedServices } from "@/hooks/useCms";
 
 import heroImg from "@/assets/hero-sunrise.jpg";
 import csrImg from "@/assets/service-csr.jpg";
@@ -30,7 +32,21 @@ import g6 from "@/assets/property-plot.jpg";
 import g7 from "@/assets/property-farmhouse.jpg";
 import g8 from "@/assets/team.jpg";
 
+const slugFallback: Record<string, string> = { csr: csrImg, solar: solarImg, property: propertyImg };
+
 const Home = () => {
+  const settings = useSiteSettings();
+  const services = usePublishedServices();
+  const phones = settings?.phones?.length ? settings.phones : SITE.phones;
+  const heroImage = settings?.hero_image_url || heroImg;
+  const heroHeading = settings?.hero_heading;
+  const heroSubheading = settings?.hero_subheading;
+  const heroCtaLabel = settings?.hero_cta_label;
+  const heroCtaLink = settings?.hero_cta_link;
+  const waNumber = settings?.whatsapp_number;
+  const waHref = (msg: string) =>
+    waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}` : waLink(msg);
+
   return (
     <>
       <Seo
@@ -42,7 +58,7 @@ const Home = () => {
       {/* HERO */}
       <section className="relative isolate overflow-hidden">
         <img
-          src={heroImg}
+          src={heroImage}
           alt="Indian village sunrise with rooftop solar panels and farmers"
           width={1920}
           height={1080}
@@ -59,11 +75,12 @@ const Home = () => {
               <Sun className="h-3.5 w-3.5" /> 80G • 12A • 10AC Registered
             </span>
             <h1 className="font-hindi text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight drop-shadow-lg">
-              ☀️ सूरज की रोशनी से<br />समाज की रोशनी तक
+              {heroHeading ? heroHeading : (<>☀️ सूरज की रोशनी से<br />समाज की रोशनी तक</>)}
             </h1>
             <p className="mt-5 text-base sm:text-lg text-white/95 max-w-xl leading-relaxed">
-              CSR Projects | Solar Energy | Property Solutions —{" "}
-              <span className="font-hindi">सब एक छत के नीचे</span>
+              {heroSubheading || (
+                <>CSR Projects | Solar Energy | Property Solutions — <span className="font-hindi">सब एक छत के नीचे</span></>
+              )}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button
@@ -71,8 +88,8 @@ const Home = () => {
                 size="lg"
                 className="bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))] font-semibold shadow-warm"
               >
-                <Link to="/contact">
-                  <span className="font-hindi">हमसे जुड़ें</span>
+                <Link to={heroCtaLink || "/contact"}>
+                  <span className="font-hindi">{heroCtaLabel || "हमसे जुड़ें"}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -176,33 +193,29 @@ const Home = () => {
             subtitle="From CSR fund utilization to solar installation and verified property deals — we make every step transparent."
           />
           <div className="grid md:grid-cols-3 gap-6">
-            <ServiceCard
-              icon={HandHeart}
-              title="CSR Project Management"
-              description="Schools, hospitals, skill centers and women employment programs — execute your CSR with measurable, transparent impact."
-              benefits={["80G tax benefit", "Brand value", "Real social impact"]}
-              to="/services/csr"
-              image={csrImg}
-              imageAlt="Children receiving notebooks at a CSR-supported classroom"
-            />
-            <ServiceCard
-              icon={Sun}
-              title="Solar Energy Solutions"
-              description="End-to-end solar for homes, offices, farms and schools — including subsidy paperwork and net-metering."
-              benefits={["Govt. subsidy support", "Near-zero electricity bills", "5-year warranty"]}
-              to="/services/solar"
-              image={solarImg}
-              imageAlt="Technicians installing rooftop solar panels"
-            />
-            <ServiceCard
-              icon={HomeIcon}
-              title="Property Buy & Sell"
-              description="Verified land, plots and farmhouses with legal verification and registry support — clean documents, no surprises."
-              benefits={["Zero brokerage", "Clean documents", "Registry support"]}
-              to="/services/property"
-              image={propertyImg}
-              imageAlt="Surveyor reviewing land documents on a verified plot"
-            />
+            {(services && services.length > 0
+              ? services
+              : [
+                  { id: "csr", slug: "csr", title: "CSR Project Management", short_description: "Schools, hospitals, skill centers and women employment programs — execute your CSR with measurable, transparent impact.", description: null, icon: "HandHeart", image_url: null, benefits: ["80G tax benefit", "Brand value", "Real social impact"], cta_label: null, cta_link: null, sort_order: 1, published: true },
+                  { id: "solar", slug: "solar", title: "Solar Energy Solutions", short_description: "End-to-end solar for homes, offices, farms and schools — including subsidy paperwork and net-metering.", description: null, icon: "Sun", image_url: null, benefits: ["Govt. subsidy support", "Near-zero electricity bills", "5-year warranty"], cta_label: null, cta_link: null, sort_order: 2, published: true },
+                  { id: "property", slug: "property", title: "Property Buy & Sell", short_description: "Verified land, plots and farmhouses with legal verification and registry support — clean documents, no surprises.", description: null, icon: "Home", image_url: null, benefits: ["Zero brokerage", "Clean documents", "Registry support"], cta_label: null, cta_link: null, sort_order: 3, published: true },
+                ]
+            ).map((s) => {
+              const Icon = ((Icons as any)[s.icon ?? ""] as any) || HandHeart;
+              const img = s.image_url || slugFallback[s.slug] || csrImg;
+              return (
+                <ServiceCard
+                  key={s.id}
+                  icon={Icon}
+                  title={s.title}
+                  description={s.short_description || s.description || ""}
+                  benefits={(s.benefits as string[]) || []}
+                  to={`/services/${s.slug}`}
+                  image={img}
+                  imageAlt={s.title}
+                />
+              );
+            })}
           </div>
         </div>
       </section>
@@ -283,8 +296,8 @@ const Home = () => {
               size="lg"
               className="bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))]"
             >
-              <a href={telLink()}>
-                <Phone className="h-5 w-5" /> Call {SITE.phones[0]}
+              <a href={telLink(phones[0])}>
+                <Phone className="h-5 w-5" /> Call {phones[0]}
               </a>
             </Button>
             <Button
@@ -293,7 +306,7 @@ const Home = () => {
               variant="outline"
               className="bg-white/10 border-white text-white hover:bg-white hover:text-foreground"
             >
-              <a href={waLink("Hi SLKF, I'd like to discuss a project.")} target="_blank" rel="noopener">
+              <a href={waHref("Hi SLKF, I'd like to discuss a project.")} target="_blank" rel="noopener">
                 <MessageCircle className="h-5 w-5" /> WhatsApp Us
               </a>
             </Button>
