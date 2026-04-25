@@ -182,10 +182,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     // Periodic safety-net refresh (every 30s) in case realtime drops
-    pollId = setInterval(() => scheduleReload(), 30000);
+    pollId = setInterval(() => scheduleReload({ reason: "30s poll" }), 30000);
 
     // Re-check whenever the tab regains focus
-    const onFocus = () => scheduleReload();
+    const onFocus = () => scheduleReload({ reason: "window focus" });
     window.addEventListener("focus", onFocus);
 
     return () => {
