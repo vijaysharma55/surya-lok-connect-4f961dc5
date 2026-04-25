@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { SunLogo } from "@/components/SunLogo";
 import { IdCard, Phone, ShieldCheck } from "lucide-react";
 
@@ -19,6 +20,8 @@ type Props = {
   data: IDCardData;
   emergencyContact?: string;
   validUntil?: string;
+  /** Absolute URL embedded in the QR code. Defaults to current origin + /verify/:code */
+  verifyUrl?: string;
 };
 
 /**
