@@ -135,27 +135,53 @@ export const IDCard = forwardRef<HTMLDivElement, Props>(
             </div>
           </div>
 
-          {/* Verified stamp */}
+          {/* Verified stamp + QR */}
           <div
             style={{
-              width: 110,
+              width: 130,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              border: "2px dashed #16a34a",
-              borderRadius: 12,
-              color: "#15803d",
-              padding: 8,
-              transform: "rotate(-6deg)",
-              alignSelf: "center",
-              height: 110,
+              justifyContent: "flex-start",
+              gap: 10,
+              alignSelf: "stretch",
             }}
           >
-            <ShieldCheck size={32} />
-            <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 1 }}>VERIFIED</div>
-            <div style={{ fontSize: 9, opacity: 0.8 }}>SLKF Office</div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                border: "2px dashed #16a34a",
+                borderRadius: 10,
+                color: "#15803d",
+                padding: "6px 8px",
+                transform: "rotate(-6deg)",
+                width: 96,
+              }}
+            >
+              <ShieldCheck size={22} />
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1 }}>VERIFIED</div>
+              <div style={{ fontSize: 8, opacity: 0.8 }}>SLKF Office</div>
+            </div>
+            <div
+              style={{
+                background: "#ffffff",
+                padding: 6,
+                border: "1px solid #e2e8f0",
+                borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <QRCodeSVG value={qrValue} size={96} level="M" includeMargin={false} />
+            </div>
+            <div style={{ fontSize: 8, color: "#64748b", textAlign: "center", lineHeight: 1.2 }}>
+              Scan to verify
+            </div>
           </div>
         </div>
 
