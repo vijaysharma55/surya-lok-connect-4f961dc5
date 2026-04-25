@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      applications: {
+        Row: {
+          aadhaar: string
+          admin_notes: string | null
+          application_code: string
+          approved_at: string | null
+          block: string
+          created_at: string
+          district: string
+          email: string | null
+          full_name: string
+          id: string
+          mobile: string
+          panchayat: string
+          payment_amount: number
+          payment_screenshot_url: string
+          photo_url: string | null
+          post: string
+          status: string
+          transaction_id: string
+          updated_at: string
+        }
+        Insert: {
+          aadhaar: string
+          admin_notes?: string | null
+          application_code?: string
+          approved_at?: string | null
+          block: string
+          created_at?: string
+          district: string
+          email?: string | null
+          full_name: string
+          id?: string
+          mobile: string
+          panchayat: string
+          payment_amount?: number
+          payment_screenshot_url: string
+          photo_url?: string | null
+          post: string
+          status?: string
+          transaction_id: string
+          updated_at?: string
+        }
+        Update: {
+          aadhaar?: string
+          admin_notes?: string | null
+          application_code?: string
+          approved_at?: string | null
+          block?: string
+          created_at?: string
+          district?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          mobile?: string
+          panchayat?: string
+          payment_amount?: number
+          payment_screenshot_url?: string
+          photo_url?: string | null
+          post?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
@@ -49,6 +115,44 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      locations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          sort_order: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          sort_order?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          sort_order?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       media: {
         Row: {
@@ -480,6 +584,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      gen_application_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
