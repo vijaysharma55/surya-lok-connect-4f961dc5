@@ -13,6 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { RoleDebugPanel } from "@/components/admin/RoleDebugPanel";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { cn } from "@/lib/utils";
@@ -136,6 +137,7 @@ export function AdminLayout({ children, title }: { children: ReactNode; title?: 
           </header>
           <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">{children}</main>
         </div>
+        <RoleDebugPanel />
       </div>
     </SidebarProvider>
   );

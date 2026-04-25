@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { roleDebug } from "@/lib/roleDebug";
 
 type AuthCtx = {
   user: User | null;
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loadRolesFor = async (uid: string, opts?: { refreshSession?: boolean }) => {
     if (opts?.refreshSession) {
       await supabase.auth.refreshSession();
+      roleDebug.emit("session-refreshed");
     }
     const [roleRes, assignRes] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
@@ -41,11 +43,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     ]);
     const nextIsAdmin = !!roleRes.data;
     const nextDistricts = Array.from(new Set((assignRes.data ?? []).map((r: any) => r.district as string))).sort();
-    // Only update state if values actually changed (prevents flicker)
-    setIsAdmin((prev) => (prev === nextIsAdmin ? prev : nextIsAdmin));
+    roleDebug.emit("fetched", `admin=${nextIsAdmin} districts=[${nextDistricts.join(",")}]`);
+
+    let changed = false;
+    setIsAdmin((prev) => {
+      if (prev === nextIsAdmin) return prev;
+      changed = true;
+      return nextIsAdmin;
+    });
     setCoordinatorDistricts((prev) => {
-      if (prev.length === nextDistricts.length && prev.every((d, i) => d === nextDistricts[i])) return prev;
+      const same = prev.length === nextDistricts.length && prev.every((d, i) => d === nextDistricts[i]);
+      if (same) return prev;
+      changed = true;
       return nextDistricts;
+    });
+    // Defer to next tick so the `changed` flag is final after both setters run
+    queueMicrotask(() => {
+      if (changed) roleDebug.emit("applied", `admin=${nextIsAdmin}`);
+      else roleDebug.emit("skipped-unchanged");
     });
   };
 
@@ -78,16 +93,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    const scheduleReload = (opts?: { refreshSession?: boolean; immediate?: boolean }) => {
+    const scheduleReload = (opts?: { refreshSession?: boolean; immediate?: boolean; reason?: string }) => {
       if (!currentUid) return;
       if (opts?.refreshSession) pendingNeedsSessionRefresh = true;
+      roleDebug.emit("scheduled", `${opts?.reason ?? "event"}${opts?.immediate ? " (immediate)" : ""}`);
 
       const fire = () => {
         debounceTimer = null;
         if (!currentUid) return;
         if (inFlight) {
           rerunAfter = true; // collapse further events into one extra run
+          roleDebug.emit("coalesced", "queued after in-flight reload");
         } else {
+          roleDebug.emit("fired");
           inFlight = runReload(currentUid);
         }
       };
@@ -97,7 +115,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         fire();
         return;
       }
-      if (debounceTimer) clearTimeout(debounceTimer);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        roleDebug.emit("debounced", `reset ${DEBOUNCE_MS}ms`);
+      }
       debounceTimer = setTimeout(fire, DEBOUNCE_MS);
     };
 
@@ -110,7 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${uid}` },
-          () => scheduleReload({ refreshSession: true })
+          () => scheduleReload({ refreshSession: true, reason: "user_roles change" })
         )
         .subscribe();
 
@@ -119,7 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "coordinator_assignments", filter: `user_id=eq.${uid}` },
-          () => scheduleReload()
+          () => scheduleReload({ reason: "coordinator_assignments change" })
         )
         .subscribe();
     };
@@ -129,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(s?.user ?? null);
       if (s?.user) {
         currentUid = s.user.id;
-        setTimeout(() => scheduleReload({ immediate: true }), 0);
+        setTimeout(() => scheduleReload({ immediate: true, reason: "auth state change" }), 0);
         subscribeForUser(s.user.id);
       } else {
         currentUid = null;
@@ -161,10 +182,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     // Periodic safety-net refresh (every 30s) in case realtime drops
-    pollId = setInterval(() => scheduleReload(), 30000);
+    pollId = setInterval(() => scheduleReload({ reason: "30s poll" }), 30000);
 
     // Re-check whenever the tab regains focus
-    const onFocus = () => scheduleReload();
+    const onFocus = () => scheduleReload({ reason: "window focus" });
     window.addEventListener("focus", onFocus);
 
     return () => {
