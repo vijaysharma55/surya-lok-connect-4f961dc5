@@ -451,34 +451,10 @@ function FileField({
             e.target.value = "";
           }}
         />
-        <Upload className="h-4 w-4 text-muted-foreground" />
+        <Upload className="h-4 w-4 text-muted-foreground shrink-0" />
         <span className="text-sm truncate">
           {file ? `${file.name} · ${formatSize(file.size)}` : "Tap to upload"}
         </span>
-      </label>
-      {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
-    </div>
-  );
-}
-  return (
-    <div>
-      <Label className="block">{label}</Label>
-      <label className="mt-1 flex items-center gap-2 rounded-md border border-dashed border-border p-3 cursor-pointer hover:bg-accent transition min-h-[44px]">
-        <input
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f && f.size > 5 * 1024 * 1024) {
-              toast.error("File must be under 5 MB");
-              return;
-            }
-            onChange(f ?? null);
-          }}
-        />
-        <Upload className="h-4 w-4 text-muted-foreground shrink-0" />
-        <span className="text-sm truncate">{file ? file.name : "Choose file"}</span>
       </label>
       {hint && <p className="text-[11px] text-muted-foreground mt-1">{hint}</p>}
       {file && file.type.startsWith("image/") && (
