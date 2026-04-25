@@ -69,12 +69,21 @@ export const InstallAppButton = ({
     try {
       await deferred.prompt();
       const choice = await deferred.userChoice;
-      if (choice.outcome === "dismissed") {
+      if (choice.outcome === "accepted") {
+        toast.success("Installing app…", {
+          description: "Hang tight — SLKF will appear on your home screen shortly.",
+        });
+      } else {
         localStorage.setItem(DISMISS_KEY, String(Date.now()));
         setHidden(true);
+        toast("Install cancelled", {
+          description: "You can install the app anytime from the menu.",
+        });
       }
     } catch {
-      // No-op: prompt() can throw if called twice
+      toast.error("Couldn't open install prompt", {
+        description: "Please try again from your browser menu.",
+      });
     } finally {
       setDeferred(null);
     }
