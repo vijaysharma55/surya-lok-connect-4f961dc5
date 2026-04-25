@@ -101,7 +101,7 @@ function AdminSidebar() {
 }
 
 export function AdminLayout({ children, title }: { children: ReactNode; title?: string }) {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, isStaff, loading } = useAuth();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
@@ -110,7 +110,7 @@ export function AdminLayout({ children, title }: { children: ReactNode; title?: 
     );
   }
   if (!user) return <Navigate to="/auth" replace />;
-  if (!isAdmin) {
+  if (!isStaff) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 text-center">
         <div className="space-y-3">
