@@ -104,7 +104,6 @@ const Home = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-            </div>
               <Button
                 asChild
                 size="lg"
