@@ -164,6 +164,9 @@ export default function AdminApplications() {
     if (error) return toast.error(error.message);
     toast.success(`Application ${status}`);
     setViewing(null);
+    setAadhaarVerifying(null);
+    setRejectMode(false);
+    setRejectReason("");
     setItems((p) => p.map((a) => (a.id === id ? { ...a, status, admin_notes: patch.admin_notes ?? a.admin_notes } : a)));
   };
 
