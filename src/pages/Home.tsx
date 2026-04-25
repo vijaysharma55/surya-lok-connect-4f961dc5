@@ -55,10 +55,7 @@ const Home = () => {
         description="Registered NGO in Patna delivering CSR projects, solar energy installations, and verified property services across Bihar with full transparency."
         path="/"
         keywords={["SLKF", "Surya Lok Kalyan Foundation", "NGO Patna", "CSR Bihar", "solar energy Bihar", "property services Patna", "80G 12A NGO"]}
-        jsonLd={[
-          (await import("@/lib/jsonld")).orgJsonLd(),
-          (await import("@/lib/jsonld")).websiteJsonLd(),
-        ]}
+        jsonLd={[orgJsonLd(), websiteJsonLd()]}
       />
 
       {/* HERO */}
