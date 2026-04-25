@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, Globe } from "lucide-react";
-import { SITE, telLink } from "@/lib/site";
+import { Phone, Mail, Facebook, Instagram, Linkedin, MessageCircle } from "lucide-react";
+import { SITE, telLink, waLink } from "@/lib/site";
 import { SunLogo } from "@/components/SunLogo";
 import { useSiteSettings } from "@/hooks/useCms";
 
@@ -9,97 +9,89 @@ export const Footer = () => {
   const siteName = settings?.site_name || SITE.name;
   const phones = settings?.phones?.length ? settings.phones : SITE.phones;
   const email = settings?.email || SITE.email;
-  const address = settings?.address || SITE.address;
-  const hours = settings?.hours || SITE.hours;
-  const compliance = settings?.compliance?.length ? settings.compliance : SITE.compliance;
-  const domain = settings?.domain || SITE.domain;
   const logoUrl = settings?.logo_url;
-  const tagline = settings?.brand_tagline || "CSR • Solar • Property";
-  const footerText = settings?.footer_text;
+  const tagline = settings?.brand_tagline || "CSR • Solar • Property — built on trust.";
+  const social = settings?.social_links || {};
+  const waNumber = settings?.whatsapp_number;
+  const waHref = waNumber
+    ? `https://wa.me/${waNumber}`
+    : waLink("Hello SLKF, I'd like to connect.");
+
+  const socials = [
+    { label: "Facebook", icon: Facebook, href: social.facebook },
+    { label: "Instagram", icon: Instagram, href: social.instagram },
+    { label: "LinkedIn", icon: Linkedin, href: social.linkedin },
+    { label: "WhatsApp", icon: MessageCircle, href: waHref },
+  ].filter((s) => s.href);
 
   return (
-    <footer className="mt-20 bg-foreground text-background">
-      <div className="container-tight py-12 grid gap-10 md:grid-cols-4">
-        <div className="md:col-span-2">
-          <div className="flex items-center gap-3 mb-4">
+    <footer className="mt-16 bg-foreground text-background">
+      <div className="container-tight py-8 grid gap-6 md:gap-8 md:grid-cols-3 text-sm">
+        {/* Col 1: Logo + tagline */}
+        <div>
+          <div className="flex items-center gap-2.5 mb-2">
             {logoUrl ? (
-              <img src={logoUrl} alt={siteName} className="h-10 w-10 rounded object-contain bg-background/5 p-1" />
+              <img src={logoUrl} alt={siteName} className="h-9 w-9 rounded object-contain bg-background/5 p-1" />
             ) : (
-              <SunLogo size={40} />
+              <SunLogo size={32} />
             )}
-            <div>
-              <div className="font-semibold text-base">{siteName}</div>
-              <div className="text-xs text-background/70">{tagline}</div>
-            </div>
+            <span className="font-semibold">{siteName}</span>
           </div>
-          <p className="text-sm text-background/80 max-w-md leading-relaxed">
-            {footerText ||
-              "A registered foundation working transparently across Bihar to deliver CSR projects, solar energy solutions, and verified property services — all under one trusted roof."}
-          </p>
-          <div className="flex gap-2 mt-4">
-            {compliance.map((c) => (
-              <span
-                key={c}
-                className="rounded bg-primary/20 text-primary px-2 py-1 text-xs font-semibold"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
+          <p className="text-xs text-background/70 leading-relaxed max-w-xs">{tagline}</p>
         </div>
 
+        {/* Col 2: Quick Links */}
         <div>
-          <h3 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">
+          <h3 className="text-xs font-semibold text-primary uppercase tracking-wide mb-2.5">
             Quick Links
           </h3>
-          <ul className="space-y-2 text-sm">
-            <li><Link to="/about" className="hover:text-primary">About Us</Link></li>
-            <li><Link to="/services" className="hover:text-primary">Services</Link></li>
-            <li><Link to="/projects" className="hover:text-primary">Projects</Link></li>
-            <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
+          <ul className="space-y-1.5">
+            <li><Link to="/" className="text-background/85 hover:text-primary transition-colors">Home</Link></li>
+            <li><Link to="/services" className="text-background/85 hover:text-primary transition-colors">Services</Link></li>
+            <li><Link to="/membership" className="text-background/85 hover:text-primary transition-colors">Membership</Link></li>
+            <li><Link to="/contact" className="text-background/85 hover:text-primary transition-colors">Contact</Link></li>
           </ul>
         </div>
 
+        {/* Col 3: Social + Contact */}
         <div>
-          <h3 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3">
-            Contact
+          <h3 className="text-xs font-semibold text-primary uppercase tracking-wide mb-2.5">
+            Connect
           </h3>
-          <ul className="space-y-2 text-sm text-background/85">
-            <li className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-              {address}
-            </li>
-            <li className="flex items-start gap-2">
-              <Clock className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-              {hours}
-            </li>
-            <li className="flex items-center gap-2 flex-wrap">
-              <Phone className="h-4 w-4 text-primary" />
-              {phones.map((p, i) => (
-                <span key={p} className="flex items-center gap-2">
-                  <a href={telLink(p)} className="hover:text-primary">{p}</a>
-                  {i < phones.length - 1 && <span className="text-background/50">/</span>}
-                </span>
+          {socials.length > 0 && (
+            <div className="flex gap-2 mb-3">
+              {socials.map(({ label, icon: Icon, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-background/20 text-background/80 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
               ))}
+            </div>
+          )}
+          <ul className="space-y-1.5 text-background/85">
+            <li className="flex items-center gap-2">
+              <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+              <a href={telLink(phones[0])} className="hover:text-primary transition-colors">{phones[0]}</a>
             </li>
             <li className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-primary" />
-              <a href={`mailto:${email}`} className="hover:text-primary break-all">{email}</a>
-            </li>
-            <li className="flex items-center gap-2">
-              <Globe className="h-4 w-4 text-primary" />
-              <a href={`https://${domain}`} className="hover:text-primary">{domain}</a>
+              <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
+              <a href={`mailto:${email}`} className="hover:text-primary transition-colors break-all">{email}</a>
             </li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-background/10">
-        <div className="container-tight py-4 text-xs text-background/60 flex flex-col sm:flex-row gap-2 justify-between">
+
+      {/* Thin copyright bar with darker tone */}
+      <div className="bg-black/40 border-t border-background/10">
+        <div className="container-tight py-2.5 text-xs text-background/60 flex flex-col sm:flex-row gap-1 justify-between items-center">
           <span>© {new Date().getFullYear()} {siteName}. All rights reserved.</span>
-          <span className="flex gap-3">
-            <span>Designed for transparency & impact.</span>
-            <Link to="/auth" className="opacity-60 hover:opacity-100 hover:text-primary">Admin</Link>
-          </span>
+          <Link to="/auth" className="opacity-60 hover:opacity-100 hover:text-primary transition">Admin</Link>
         </div>
       </div>
     </footer>
