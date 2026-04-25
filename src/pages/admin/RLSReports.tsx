@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, RefreshCcw, Download, ShieldCheck, ShieldAlert,
-  ArrowDownCircle, ArrowUpCircle, MinusCircle, PlusCircle, CircleDot,
+  ArrowDownCircle, ArrowUpCircle, MinusCircle, PlusCircle, CircleDot, Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 
