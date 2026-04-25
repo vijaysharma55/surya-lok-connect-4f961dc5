@@ -232,3 +232,20 @@ function NotFoundState({ code }: { code: string }) {
     </div>
   );
 }
+
+function RateLimitedState() {
+  return (
+    <div className="text-center py-6 space-y-3">
+      <div className="mx-auto h-12 w-12 rounded-full bg-yellow-500/15 text-yellow-700 flex items-center justify-center">
+        <Clock className="h-6 w-6" />
+      </div>
+      <div className="font-semibold text-foreground">Too many verification attempts</div>
+      <p className="text-xs text-muted-foreground">
+        For security, please wait a minute before scanning this ID again.
+      </p>
+      <Button asChild variant="outline" size="sm">
+        <Link to="/">Back to home</Link>
+      </Button>
+    </div>
+  );
+}
