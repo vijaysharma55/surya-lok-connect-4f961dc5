@@ -98,7 +98,7 @@ export const useSiteSettings = () => {
         });
     fetch();
     const channel = supabase
-      .channel("site_settings-rt")
+      .channel(`site_settings-rt-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, () => fetch())
       .subscribe();
     return () => {
@@ -130,7 +130,7 @@ export const usePublishedServices = () => {
         });
     fetch();
     const channel = supabase
-      .channel("services-rt")
+      .channel(`services-rt-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "services" }, () => fetch())
       .subscribe();
     return () => {
@@ -156,7 +156,7 @@ export const usePublishedProjects = () => {
         });
     fetch();
     const channel = supabase
-      .channel("projects-rt")
+      .channel(`projects-rt-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => fetch())
       .subscribe();
     return () => {
@@ -192,7 +192,7 @@ export const usePageSections = (slug: string) => {
     };
     fetch();
     const channel = supabase
-      .channel(`page_sections-${slug}`)
+      .channel(`page_sections-${slug}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "page_sections" }, () => fetch())
       .subscribe();
     return () => {
