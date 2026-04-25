@@ -189,38 +189,66 @@ function StatusCard({ status, notes }: { status: string; notes: string | null })
 
 function VolunteerCard({ app }: { app: Application }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<"pdf" | "png" | null>(null);
 
-  const handleDownload = async () => {
+  const markFirstDownload = async () => {
+    if (app.id_card_downloaded_at) return;
+    await supabase
+      .from("applications")
+      .update({ id_card_downloaded_at: new Date().toISOString() })
+      .eq("id", app.id);
+    try { fireConfetti(); } catch { /* noop */ }
+  };
+
+  const handleDownload = async (kind: "pdf" | "png") => {
     if (!cardRef.current) return;
-    setDownloading(true);
+    setDownloading(kind);
     try {
-      await generateIdCardPDF(cardRef.current, safeFileName(app.full_name));
-      toast.success("ID Card Downloaded Successfully");
+      if (kind === "pdf") {
+        await generateIdCardPDF(cardRef.current, safeFileName(app.full_name, "pdf"));
+      } else {
+        await generateIdCardPNG(cardRef.current, safeFileName(app.full_name, "png"));
+      }
+      toast.success(`ID Card downloaded (${kind.toUpperCase()})`);
+      markFirstDownload();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to generate PDF");
+      toast.error("Failed to generate file");
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
   return (
     <>
-      <Button
-        onClick={handleDownload}
-        disabled={downloading}
-        aria-busy={downloading}
-        aria-live="polite"
-        className="w-full sm:w-auto gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-        size="lg"
-      >
-        {downloading ? (
-          <><Loader2 className="h-4 w-4 animate-spin" aria-hidden /><span>Generating PDF…</span></>
-        ) : (
-          <><DownloadCloud className="h-4 w-4" aria-hidden /><span>Download Volunteer ID (PDF)</span></>
-        )}
-      </Button>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Button
+          onClick={() => handleDownload("pdf")}
+          disabled={!!downloading}
+          aria-busy={downloading === "pdf"}
+          className="gap-2 disabled:opacity-70"
+          size="lg"
+        >
+          {downloading === "pdf" ? (
+            <><Loader2 className="h-4 w-4 animate-spin" aria-hidden /><span>Generating PDF…</span></>
+          ) : (
+            <><DownloadCloud className="h-4 w-4" aria-hidden /><span>Download ID (PDF)</span></>
+          )}
+        </Button>
+        <Button
+          onClick={() => handleDownload("png")}
+          disabled={!!downloading}
+          variant="outline"
+          className="gap-2 disabled:opacity-70"
+          size="lg"
+        >
+          {downloading === "png" ? (
+            <><Loader2 className="h-4 w-4 animate-spin" aria-hidden /><span>Generating PNG…</span></>
+          ) : (
+            <><DownloadCloud className="h-4 w-4" aria-hidden /><span>Download ID (PNG)</span></>
+          )}
+        </Button>
+      </div>
 
       <Card className="overflow-hidden border-2 border-primary/40 shadow-warm">
         <div className="bg-foreground text-background px-4 py-2 flex items-center justify-between">
