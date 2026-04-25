@@ -304,14 +304,16 @@ export default function Apply() {
                     accept="image/*"
                     file={photoFile}
                     onChange={setPhotoFile}
-                    hint="JPG/PNG, under 5 MB."
+                    maxSizeMB={5}
+                    hint="JPG/PNG/WEBP, up to 5 MB."
                   />
                   <FileField
                     label="Aadhaar card image"
                     accept="image/*"
                     file={aadhaarFile}
                     onChange={setAadhaarFile}
-                    hint="Front side of Aadhaar. JPG/PNG, under 5 MB."
+                    maxSizeMB={5}
+                    hint="Front side of Aadhaar. JPG/PNG/WEBP, up to 5 MB."
                   />
                 </div>
               </div>
