@@ -12,6 +12,14 @@ const About = () => (
       title="About SLKF — Mission, Vision & Compliance"
       description="Founded on 24 May 2026 in Mithapur, Patna, SLKF is a transparent foundation working across CSR, solar and property services with 80G, 12A and 10AC compliance."
       path="/about"
+      keywords={["About SLKF", "NGO mission Bihar", "80G 12A 10AC", "Patna foundation", "transparent NGO"]}
+      jsonLd={[
+        orgJsonLd(),
+        breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ]),
+      ]}
     />
 
     {/* HEADER */}
