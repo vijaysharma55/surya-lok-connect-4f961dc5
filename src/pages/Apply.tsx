@@ -226,23 +226,29 @@ export default function Apply() {
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div>
                     <Label>District *</Label>
-                    <Select value={form.district} onValueChange={(v) => { set("district", v); set("block", ""); set("panchayat", ""); }}>
-                      <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
-                      <SelectContent>
-                        {districts.length === 0 && <div className="px-3 py-2 text-xs text-muted-foreground">No districts yet</div>}
-                        {districts.map((d) => <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      ariaLabel="Select district"
+                      placeholder="Select district"
+                      searchPlaceholder="Search 38 districts…"
+                      emptyText={districts.length === 0 ? "No districts yet" : "No matching districts"}
+                      options={districts.map((d) => ({ value: d.name, label: d.name }))}
+                      value={form.district}
+                      onChange={(v) => { set("district", v); set("block", ""); set("panchayat", ""); }}
+                    />
                     {errors.district && <p className="text-xs text-destructive mt-1">{errors.district}</p>}
                   </div>
                   <div>
                     <Label>Block *</Label>
-                    <Select value={form.block} onValueChange={(v) => { set("block", v); set("panchayat", ""); }} disabled={!form.district}>
-                      <SelectTrigger><SelectValue placeholder={form.district ? (blocks.length ? "Select block" : "No blocks — type below") : "Select district first"} /></SelectTrigger>
-                      <SelectContent>
-                        {blocks.map((b) => <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      ariaLabel="Select block"
+                      placeholder={form.district ? (blocks.length ? "Select block" : "No blocks — type below") : "Select district first"}
+                      searchPlaceholder="Search blocks…"
+                      emptyText="No matching blocks"
+                      options={blocks.map((b) => ({ value: b.name, label: b.name }))}
+                      value={form.block}
+                      onChange={(v) => { set("block", v); set("panchayat", ""); }}
+                      disabled={!form.district || blocks.length === 0}
+                    />
                     {form.district && blocks.length === 0 && (
                       <Input className="mt-2" placeholder="Type your block name" value={form.block} onChange={(e) => set("block", e.target.value)} maxLength={80} />
                     )}
@@ -250,12 +256,16 @@ export default function Apply() {
                   </div>
                   <div>
                     <Label>Panchayat *</Label>
-                    <Select value={form.panchayat} onValueChange={(v) => set("panchayat", v)} disabled={!form.block}>
-                      <SelectTrigger><SelectValue placeholder={form.block ? (panchayats.length ? "Select panchayat" : "No panchayats — type below") : "Select block first"} /></SelectTrigger>
-                      <SelectContent>
-                        {panchayats.map((p) => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      ariaLabel="Select panchayat"
+                      placeholder={form.block ? (panchayats.length ? "Select panchayat" : "No panchayats — type below") : "Select block first"}
+                      searchPlaceholder="Search panchayats…"
+                      emptyText="No matching panchayats"
+                      options={panchayats.map((p) => ({ value: p.name, label: p.name }))}
+                      value={form.panchayat}
+                      onChange={(v) => set("panchayat", v)}
+                      disabled={!form.block || panchayats.length === 0}
+                    />
                     {form.block && panchayats.length === 0 && (
                       <Input className="mt-2" placeholder="Type your panchayat name" value={form.panchayat} onChange={(e) => set("panchayat", e.target.value)} maxLength={80} />
                     )}
