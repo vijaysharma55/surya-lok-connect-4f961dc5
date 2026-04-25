@@ -22,16 +22,26 @@ export default function Verify() {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<VerifyData | null>(null);
+  const [rateLimited, setRateLimited] = useState(false);
 
   useEffect(() => {
     let cancel = false;
     (async () => {
       if (!id) { setLoading(false); return; }
-      const { data: row } = await supabase
-        .from("applications")
-        .select("application_code,full_name,post,district,status,photo_url,approved_at")
-        .eq("application_code", id)
-        .maybeSingle();
+
+      // Best-effort rate limit: 30 lookups / minute / id
+      const { data: rl } = await supabase.rpc("rate_limit_hit", {
+        p_key: `verify:${id}`,
+        p_max: 30,
+      });
+      const allowed = Array.isArray(rl) ? rl[0]?.allowed !== false : true;
+      if (!allowed) {
+        if (!cancel) { setRateLimited(true); setLoading(false); }
+        return;
+      }
+
+      const { data: rows } = await supabase.rpc("public_verify_id", { p_id: id });
+      const row = Array.isArray(rows) && rows.length ? rows[0] : null;
       if (!cancel) {
         setData((row as VerifyData) ?? null);
         setLoading(false);
