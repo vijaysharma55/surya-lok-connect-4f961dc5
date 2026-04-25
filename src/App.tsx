@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { AuthProvider } from "@/hooks/useAuth";
 
 import Home from "./pages/Home";
@@ -41,7 +42,7 @@ const Shell = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {!isBare && <Header />}
-      <main className="flex-1">
+      <main className={`flex-1 ${!isBare ? "pb-[calc(env(safe-area-inset-bottom)+64px)] md:pb-0" : ""}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -70,6 +71,7 @@ const Shell = () => {
       </main>
       {!isBare && <Footer />}
       {!isBare && <WhatsAppFloat />}
+      {!isBare && <MobileBottomNav />}
     </div>
   );
 };
