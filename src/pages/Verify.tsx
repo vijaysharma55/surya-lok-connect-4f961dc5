@@ -86,6 +86,8 @@ export default function Verify() {
                 <Loader2 className="h-6 w-6 animate-spin" />
                 <span className="text-sm">Verifying ID…</span>
               </div>
+            ) : rateLimited ? (
+              <RateLimitedState />
             ) : !data ? (
               <NotFoundState code={id ?? ""} />
             ) : (
