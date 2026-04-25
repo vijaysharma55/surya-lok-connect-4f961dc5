@@ -71,6 +71,7 @@ const Shell = () => {
       </main>
       {!isBare && <Footer />}
       {!isBare && <WhatsAppFloat />}
+      {!isBare && <MobileBottomNav />}
     </div>
   );
 };
