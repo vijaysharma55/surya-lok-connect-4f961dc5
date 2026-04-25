@@ -1,5 +1,6 @@
 import { CheckCircle2, Eye, Users, Handshake, Building2, ShieldCheck } from "lucide-react";
 import { Seo } from "@/components/Seo";
+import { orgJsonLd, breadcrumbJsonLd } from "@/lib/jsonld";
 import { SectionHeading } from "@/components/SectionHeading";
 import { SITE } from "@/lib/site";
 import aboutImg from "@/assets/about-community.jpg";
