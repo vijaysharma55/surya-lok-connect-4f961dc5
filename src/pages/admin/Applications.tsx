@@ -19,7 +19,15 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Search, Eye, Check, X, Trash2, FileSpreadsheet, Loader2, AlertTriangle } from "lucide-react";
+import { Search, Eye, Check, X, Trash2, FileSpreadsheet, Loader2, AlertTriangle, ScanLine, ZoomIn } from "lucide-react";
+
+const AADHAAR_REJECT_REASONS = [
+  "Aadhaar image is blurry / unreadable",
+  "Aadhaar number does not match submitted value",
+  "Name on Aadhaar does not match application",
+  "Aadhaar image appears tampered or invalid",
+  "Wrong document uploaded (not an Aadhaar)",
+];
 
 type Application = {
   id: string;
