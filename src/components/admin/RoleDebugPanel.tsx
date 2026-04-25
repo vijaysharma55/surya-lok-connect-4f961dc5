@@ -25,7 +25,10 @@ export const RoleDebugPanel = () => {
   const [open, setOpen] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
 
-  useEffect(() => roleDebug.subscribe(setEvents), []);
+  useEffect(() => {
+    const unsub = roleDebug.subscribe(setEvents);
+    return () => { unsub(); };
+  }, []);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
