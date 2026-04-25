@@ -1,22 +1,24 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, CheckCircle2, XCircle, Search, IdCard, DownloadCloud, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Clock, CheckCircle2, XCircle, IdCard, DownloadCloud, Loader2, LogOut, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { SunLogo } from "@/components/SunLogo";
 import { IDCard as IDCardTemplate } from "@/components/IDCard";
 import { generateIdCardPDF, safeFileName } from "@/lib/generatePDF";
+import { maskAadhaar } from "@/lib/mask";
 
 type Application = {
   id: string;
   application_code: string;
   full_name: string;
   mobile: string;
+  aadhaar: string;
   email: string | null;
   district: string;
   block: string;
@@ -30,89 +32,96 @@ type Application = {
 };
 
 export default function MyProfile() {
-  const [mobile, setMobile] = useState("");
-  const [aadhaar, setAadhaar] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const { user, loading: authLoading, signOut } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [app, setApp] = useState<Application | null>(null);
 
-  const lookup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!mobile.trim() || aadhaar.length !== 12) {
-      toast.error("Enter mobile and 12-digit Aadhaar");
-      return;
-    }
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("applications")
-      .select("id,application_code,full_name,mobile,email,district,block,panchayat,post,status,photo_url,admin_notes,approved_at,created_at")
-      .eq("mobile", mobile.trim())
-      .eq("aadhaar", aadhaar.trim())
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    setLoading(false);
-    setSearched(true);
-    if (error) { toast.error(error.message); return; }
-    setApp((data as Application) ?? null);
-  };
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { setLoading(false); return; }
+    let cancel = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("applications")
+        .select(
+          "id,application_code,full_name,mobile,aadhaar,email,district,block,panchayat,post,status,photo_url,admin_notes,approved_at,created_at",
+        )
+        .eq("claimed_by", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancel) return;
+      if (error) toast.error(error.message);
+      setApp((data as Application) ?? null);
+      setLoading(false);
+    })();
+    return () => { cancel = true; };
+  }, [user, authLoading]);
+
+  if (authLoading) return null;
+  if (!user) return <Navigate to="/auth?redirect=/my-profile" replace />;
 
   return (
     <>
       <Seo
-        title="My Volunteer Profile — SLKF"
-        description="Check your SLKF volunteer application status and download your Volunteer ID card."
+        title="My Profile — SLKF"
+        description="Your SLKF volunteer profile, status, and ID card."
         path="/my-profile"
+        noIndex
       />
 
       <section className="gradient-warm">
-        <div className="container-tight py-10 sm:py-14 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">My Volunteer Profile</h1>
-          <p className="mt-3 text-muted-foreground max-w-xl mx-auto text-sm sm:text-base">
-            Enter the mobile number and Aadhaar you used in your application to view your status and ID card.
-          </p>
+        <div className="container-tight py-10 sm:py-14">
+          <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground">My Profile</h1>
+              <p className="mt-2 text-muted-foreground text-sm sm:text-base inline-flex items-center gap-2">
+                <Mail className="h-4 w-4" /> {user.email}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => signOut()} className="gap-2">
+              <LogOut className="h-4 w-4" /> Sign out
+            </Button>
+          </div>
         </div>
       </section>
 
       <section className="container-tight py-8 sm:py-12">
-        <Card className="max-w-md mx-auto shadow-warm">
-          <CardHeader><CardTitle>Lookup your application</CardTitle></CardHeader>
-          <CardContent>
-            <form onSubmit={lookup} className="space-y-3">
-              <div>
-                <Label htmlFor="m">Mobile</Label>
-                <Input id="m" inputMode="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="9XXXXXXXXX" />
-              </div>
-              <div>
-                <Label htmlFor="a">Aadhaar (12 digits)</Label>
-                <Input id="a" inputMode="numeric" value={aadhaar} onChange={(e) => setAadhaar(e.target.value.replace(/\D/g, "").slice(0, 12))} placeholder="123412341234" />
-              </div>
-              <Button type="submit" disabled={loading} className="w-full">
-                <Search className="h-4 w-4" /> {loading ? "Checking…" : "Check status"}
+        {loading ? (
+          <div className="flex justify-center py-12 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : !app ? (
+          <Card className="max-w-md mx-auto shadow-warm">
+            <CardHeader><CardTitle>No application linked</CardTitle></CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                We couldn't find an application tied to <span className="font-medium text-foreground">{user.email}</span>.
+              </p>
+              <p>
+                If you applied with a different email, please use that email to sign in. Otherwise, submit a new application below.
+              </p>
+              <Button asChild className="w-full mt-2">
+                <Link to="/apply">Apply now</Link>
               </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {searched && !app && (
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            No application found with those details. Please check your mobile and Aadhaar, or{" "}
-            <a href="/apply" className="underline text-primary">submit a new application</a>.
-          </p>
-        )}
-
-        {app && (
-          <div className="max-w-2xl mx-auto mt-8">
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="max-w-2xl mx-auto space-y-4">
             <StatusCard status={app.status} notes={app.admin_notes} />
             {app.status === "approved" || app.status === "active" ? (
               <VolunteerCard app={app} />
             ) : (
-              <Card className="mt-4">
+              <Card>
                 <CardContent className="p-6 text-sm space-y-2">
                   <div className="font-semibold">Application: {app.application_code}</div>
                   <div className="text-muted-foreground">{app.full_name} · {app.post}</div>
                   <div className="text-muted-foreground">{app.panchayat}, {app.block}, {app.district}</div>
-                  <div className="text-xs text-muted-foreground">Submitted {new Date(app.created_at).toLocaleString()}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Aadhaar: <span className="font-mono">{maskAadhaar(app.aadhaar)}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Submitted {new Date(app.created_at).toLocaleString()}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -182,23 +191,17 @@ function VolunteerCard({ app }: { app: Application }) {
         disabled={downloading}
         aria-busy={downloading}
         aria-live="polite"
-        className="mt-4 w-full sm:w-auto gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full sm:w-auto gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         size="lg"
       >
         {downloading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            <span>Generating PDF…</span>
-          </>
+          <><Loader2 className="h-4 w-4 animate-spin" aria-hidden /><span>Generating PDF…</span></>
         ) : (
-          <>
-            <DownloadCloud className="h-4 w-4" aria-hidden />
-            <span>Download Volunteer ID (PDF)</span>
-          </>
+          <><DownloadCloud className="h-4 w-4" aria-hidden /><span>Download Volunteer ID (PDF)</span></>
         )}
       </Button>
 
-      <Card className="mt-4 overflow-hidden border-2 border-primary/40 shadow-warm">
+      <Card className="overflow-hidden border-2 border-primary/40 shadow-warm">
         <div className="bg-foreground text-background px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <SunLogo size={22} />
@@ -222,7 +225,7 @@ function VolunteerCard({ app }: { app: Application }) {
                 <div><span className="font-medium text-foreground">District:</span> {app.district}</div>
                 <div><span className="font-medium text-foreground">Block:</span> {app.block}</div>
                 <div><span className="font-medium text-foreground">Panchayat:</span> {app.panchayat}</div>
-                <div><span className="font-medium text-foreground">Mobile:</span> {app.mobile}</div>
+                <div><span className="font-medium text-foreground">Aadhaar:</span> <span className="font-mono">{maskAadhaar(app.aadhaar)}</span></div>
               </div>
             </div>
           </div>
@@ -235,16 +238,9 @@ function VolunteerCard({ app }: { app: Application }) {
         </CardContent>
       </Card>
 
-      {/* Hidden printable ID card — rendered off-screen for html2canvas */}
       <div
         aria-hidden
-        style={{
-          position: "fixed",
-          left: -10000,
-          top: 0,
-          pointerEvents: "none",
-          opacity: 0,
-        }}
+        style={{ position: "fixed", left: -10000, top: 0, pointerEvents: "none", opacity: 0 }}
       >
         <IDCardTemplate ref={cardRef} data={app} />
       </div>

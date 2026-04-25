@@ -132,7 +132,7 @@ export default function Apply() {
       if (dup && dup.length > 0) {
         const which = dup[0].mobile === parsed.data.mobile ? "mobile number" : "Aadhaar";
         toast.error(
-          `This ${which} is already registered. Please check your status in 'Track Application'.`
+          `This ${which} is already registered. Please sign in to view your profile.`
         );
         setSubmitting(false);
         return;
@@ -176,7 +176,7 @@ export default function Apply() {
       // Postgres unique violation fallback (race condition / DB-level guard)
       if (err?.code === "23505") {
         toast.error(
-          "Duplicate detected. This mobile or Aadhaar is already registered. Please check 'Track Application'."
+          "Duplicate detected. This mobile or Aadhaar is already registered. Please sign in to view your profile."
         );
       } else {
         toast.error(err.message ?? "Submission failed");

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Search, Eye, Check, X, Trash2, FileSpreadsheet, Loader2, AlertTriangle, ScanLine, ZoomIn } from "lucide-react";
+import { maskAadhaar } from "@/lib/mask";
 
 const AADHAAR_REJECT_REASONS = [
   "Aadhaar image is blurry / unreadable",
@@ -330,7 +331,11 @@ export default function AdminApplications() {
                         )}
                       </TableCell>
                       <TableCell className="text-xs">{a.mobile}</TableCell>
-                      <TableCell className="font-mono text-xs">{a.aadhaar}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {isAdmin || coordinatorDistricts.includes(a.district)
+                          ? a.aadhaar
+                          : maskAadhaar(a.aadhaar)}
+                      </TableCell>
                       <TableCell className="text-xs">{a.post}</TableCell>
                       <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{a.district} › {a.block} › {a.panchayat}</TableCell>
                       <TableCell className={mismatch ? "text-destructive font-semibold whitespace-nowrap" : "whitespace-nowrap"}>
@@ -393,7 +398,7 @@ export default function AdminApplications() {
                 <Detail label="Name" value={viewing.full_name} />
                 <Detail label="Post" value={viewing.post} />
                 <Detail label="Mobile" value={viewing.mobile} />
-                <Detail label="Aadhaar" value={viewing.aadhaar} mono />
+                <Detail label="Aadhaar" value={isAdmin || coordinatorDistricts.includes(viewing.district) ? viewing.aadhaar : maskAadhaar(viewing.aadhaar)} mono />
                 <Detail label="Email" value={viewing.email ?? "—"} />
                 <Detail label="Location" value={`${viewing.district} › ${viewing.block} › ${viewing.panchayat}`} />
                 <Detail label="Txn ID" value={viewing.transaction_id} mono />
@@ -405,24 +410,30 @@ export default function AdminApplications() {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Payment screenshot</div>
-                  <a href={viewing.payment_screenshot_url} target="_blank" rel="noopener" className="block">
-                    <img loading="lazy" src={viewing.payment_screenshot_url} alt="Payment" className="rounded border max-h-72 w-full object-contain bg-muted" />
-                  </a>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Aadhaar image</div>
-                  {viewing.aadhaar_image_url ? (
-                    <a href={viewing.aadhaar_image_url} target="_blank" rel="noopener" className="block">
-                      <img loading="lazy" src={viewing.aadhaar_image_url} alt="Aadhaar" className="rounded border max-h-72 w-full object-contain bg-muted" />
+              {(isAdmin || coordinatorDistricts.includes(viewing.district)) ? (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Payment screenshot</div>
+                    <a href={viewing.payment_screenshot_url} target="_blank" rel="noopener" className="block">
+                      <img loading="lazy" src={viewing.payment_screenshot_url} alt="Payment" className="rounded border max-h-72 w-full object-contain bg-muted" />
                     </a>
-                  ) : (
-                    <div className="rounded border bg-muted p-6 text-center text-xs text-muted-foreground">No Aadhaar image uploaded</div>
-                  )}
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Aadhaar image</div>
+                    {viewing.aadhaar_image_url ? (
+                      <a href={viewing.aadhaar_image_url} target="_blank" rel="noopener" className="block">
+                        <img loading="lazy" src={viewing.aadhaar_image_url} alt="Aadhaar" className="rounded border max-h-72 w-full object-contain bg-muted" />
+                      </a>
+                    ) : (
+                      <div className="rounded border bg-muted p-6 text-center text-xs text-muted-foreground">No Aadhaar image uploaded</div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="rounded border bg-muted/40 p-4 text-center text-xs text-muted-foreground">
+                  Sensitive documents (Aadhaar &amp; payment screenshot) are restricted to admins and the assigned district coordinator.
+                </div>
+              )}
 
               {viewing.photo_url && (
                 <div>
@@ -471,28 +482,38 @@ export default function AdminApplications() {
             <div className="space-y-4 text-sm">
               <div className="grid sm:grid-cols-2 gap-3">
                 <Detail label="Applicant" value={aadhaarVerifying.full_name} />
-                <Detail label="Submitted Aadhaar" value={aadhaarVerifying.aadhaar} mono />
+                <Detail
+                  label="Submitted Aadhaar"
+                  value={isAdmin || coordinatorDistricts.includes(aadhaarVerifying.district) ? aadhaarVerifying.aadhaar : maskAadhaar(aadhaarVerifying.aadhaar)}
+                  mono
+                />
               </div>
 
-              <div>
-                <div className="text-xs text-muted-foreground mb-1 flex items-center justify-between">
-                  <span>Uploaded Aadhaar image</span>
-                  {aadhaarVerifying.aadhaar_image_url && (
-                    <button type="button" onClick={() => setZoomImg(aadhaarVerifying.aadhaar_image_url!)} className="text-blue-600 inline-flex items-center gap-1 hover:underline">
-                      <ZoomIn className="h-3 w-3" /> Zoom
-                    </button>
+              {(isAdmin || coordinatorDistricts.includes(aadhaarVerifying.district)) ? (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1 flex items-center justify-between">
+                    <span>Uploaded Aadhaar image</span>
+                    {aadhaarVerifying.aadhaar_image_url && (
+                      <button type="button" onClick={() => setZoomImg(aadhaarVerifying.aadhaar_image_url!)} className="text-blue-600 inline-flex items-center gap-1 hover:underline">
+                        <ZoomIn className="h-3 w-3" /> Zoom
+                      </button>
+                    )}
+                  </div>
+                  {aadhaarVerifying.aadhaar_image_url ? (
+                    <a href={aadhaarVerifying.aadhaar_image_url} target="_blank" rel="noopener" className="block">
+                      <img loading="lazy" src={aadhaarVerifying.aadhaar_image_url} alt="Aadhaar document" className="rounded border max-h-96 w-full object-contain bg-muted" />
+                    </a>
+                  ) : (
+                    <div className="rounded border bg-muted p-8 text-center text-xs text-muted-foreground">
+                      No Aadhaar image uploaded by applicant.
+                    </div>
                   )}
                 </div>
-                {aadhaarVerifying.aadhaar_image_url ? (
-                  <a href={aadhaarVerifying.aadhaar_image_url} target="_blank" rel="noopener" className="block">
-                    <img loading="lazy" src={aadhaarVerifying.aadhaar_image_url} alt="Aadhaar document" className="rounded border max-h-96 w-full object-contain bg-muted" />
-                  </a>
-                ) : (
-                  <div className="rounded border bg-muted p-8 text-center text-xs text-muted-foreground">
-                    No Aadhaar image uploaded by applicant.
-                  </div>
-                )}
-              </div>
+              ) : (
+                <div className="rounded border bg-muted/40 p-6 text-center text-xs text-muted-foreground">
+                  Aadhaar image is restricted to admins and the assigned district coordinator.
+                </div>
+              )}
 
               {rejectMode ? (
                 <div className="space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">

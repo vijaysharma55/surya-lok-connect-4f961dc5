@@ -21,6 +21,8 @@ import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Membership from "./pages/Membership";
 import Apply from "./pages/Apply";
 import MyProfile from "./pages/MyProfile";
@@ -42,7 +44,7 @@ const queryClient = new QueryClient();
 
 const Shell = () => {
   const { pathname } = useLocation();
-  const isBare = pathname.startsWith("/admin") || pathname === "/auth";
+  const isBare = pathname.startsWith("/admin") || pathname === "/auth" || pathname === "/forgot-password" || pathname === "/reset-password";
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -63,6 +65,8 @@ const Shell = () => {
           <Route path="/my-profile" element={<MyProfile />} />
           <Route path="/verify/:id" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/members" element={<AdminMembers />} />
           <Route path="/admin/applications" element={<AdminApplications />} />

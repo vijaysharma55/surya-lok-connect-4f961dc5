@@ -23,6 +23,7 @@ export type Database = {
           application_code: string
           approved_at: string | null
           block: string
+          claimed_by: string | null
           created_at: string
           district: string
           email: string | null
@@ -47,6 +48,7 @@ export type Database = {
           application_code?: string
           approved_at?: string | null
           block: string
+          claimed_by?: string | null
           created_at?: string
           district: string
           email?: string | null
@@ -71,6 +73,7 @@ export type Database = {
           application_code?: string
           approved_at?: string | null
           block?: string
+          claimed_by?: string | null
           created_at?: string
           district?: string
           email?: string | null
@@ -296,6 +299,8 @@ export type Database = {
           aadhaar: string | null
           address: string | null
           amount_paid: number
+          application_code: string | null
+          claimed_by: string | null
           created_at: string
           district: string | null
           email: string | null
@@ -313,6 +318,8 @@ export type Database = {
           aadhaar?: string | null
           address?: string | null
           amount_paid?: number
+          application_code?: string | null
+          claimed_by?: string | null
           created_at?: string
           district?: string | null
           email?: string | null
@@ -330,6 +337,8 @@ export type Database = {
           aadhaar?: string | null
           address?: string | null
           amount_paid?: number
+          application_code?: string | null
+          claimed_by?: string | null
           created_at?: string
           district?: string | null
           email?: string | null
