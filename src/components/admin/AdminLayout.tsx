@@ -36,6 +36,7 @@ const items = [
   { title: "Services", url: "/admin/services", icon: Wrench },
   { title: "Projects", url: "/admin/projects", icon: ImageIcon },
   { title: "Media", url: "/admin/media", icon: ImageIcon },
+  { title: "Members", url: "/admin/members", icon: Inbox },
   { title: "Leads", url: "/admin/leads", icon: Inbox },
   { title: "SEO", url: "/admin/seo", icon: Search },
   { title: "Header & Footer", url: "/admin/header-footer", icon: PanelTop },
