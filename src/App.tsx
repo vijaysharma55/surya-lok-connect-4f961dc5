@@ -39,6 +39,7 @@ import AdminMedia from "./pages/admin/Media";
 import AdminSeo from "./pages/admin/Seo";
 import AdminHeaderFooter from "./pages/admin/HeaderFooter";
 import AdminSettings from "./pages/admin/Settings";
+import AdminDocuments from "./pages/admin/Documents";
 
 const queryClient = new QueryClient();
 
