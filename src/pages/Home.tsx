@@ -14,6 +14,7 @@ import {
 import * as Icons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
+import { orgJsonLd, websiteJsonLd } from "@/lib/jsonld";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ServiceCard } from "@/components/ServiceCard";
 import { SITE, telLink, waLink } from "@/lib/site";
@@ -53,6 +54,8 @@ const Home = () => {
         title="Surya Lok Kalyan Foundation — CSR, Solar & Property in Bihar"
         description="Registered NGO in Patna delivering CSR projects, solar energy installations, and verified property services across Bihar with full transparency."
         path="/"
+        keywords={["SLKF", "Surya Lok Kalyan Foundation", "NGO Patna", "CSR Bihar", "solar energy Bihar", "property services Patna", "80G 12A NGO"]}
+        jsonLd={[orgJsonLd(), websiteJsonLd()]}
       />
 
       {/* HERO */}
