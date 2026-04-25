@@ -410,24 +410,30 @@ export default function AdminApplications() {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Payment screenshot</div>
-                  <a href={viewing.payment_screenshot_url} target="_blank" rel="noopener" className="block">
-                    <img loading="lazy" src={viewing.payment_screenshot_url} alt="Payment" className="rounded border max-h-72 w-full object-contain bg-muted" />
-                  </a>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">Aadhaar image</div>
-                  {viewing.aadhaar_image_url ? (
-                    <a href={viewing.aadhaar_image_url} target="_blank" rel="noopener" className="block">
-                      <img loading="lazy" src={viewing.aadhaar_image_url} alt="Aadhaar" className="rounded border max-h-72 w-full object-contain bg-muted" />
+              {(isAdmin || coordinatorDistricts.includes(viewing.district)) ? (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Payment screenshot</div>
+                    <a href={viewing.payment_screenshot_url} target="_blank" rel="noopener" className="block">
+                      <img loading="lazy" src={viewing.payment_screenshot_url} alt="Payment" className="rounded border max-h-72 w-full object-contain bg-muted" />
                     </a>
-                  ) : (
-                    <div className="rounded border bg-muted p-6 text-center text-xs text-muted-foreground">No Aadhaar image uploaded</div>
-                  )}
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Aadhaar image</div>
+                    {viewing.aadhaar_image_url ? (
+                      <a href={viewing.aadhaar_image_url} target="_blank" rel="noopener" className="block">
+                        <img loading="lazy" src={viewing.aadhaar_image_url} alt="Aadhaar" className="rounded border max-h-72 w-full object-contain bg-muted" />
+                      </a>
+                    ) : (
+                      <div className="rounded border bg-muted p-6 text-center text-xs text-muted-foreground">No Aadhaar image uploaded</div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="rounded border bg-muted/40 p-4 text-center text-xs text-muted-foreground">
+                  Sensitive documents (Aadhaar &amp; payment screenshot) are restricted to admins and the assigned district coordinator.
+                </div>
+              )}
 
               {viewing.photo_url && (
                 <div>
@@ -476,7 +482,11 @@ export default function AdminApplications() {
             <div className="space-y-4 text-sm">
               <div className="grid sm:grid-cols-2 gap-3">
                 <Detail label="Applicant" value={aadhaarVerifying.full_name} />
-                <Detail label="Submitted Aadhaar" value={aadhaarVerifying.aadhaar} mono />
+                <Detail
+                  label="Submitted Aadhaar"
+                  value={isAdmin || coordinatorDistricts.includes(aadhaarVerifying.district) ? aadhaarVerifying.aadhaar : maskAadhaar(aadhaarVerifying.aadhaar)}
+                  mono
+                />
               </div>
 
               <div>
