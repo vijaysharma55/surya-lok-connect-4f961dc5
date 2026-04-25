@@ -193,33 +193,29 @@ const Home = () => {
             subtitle="From CSR fund utilization to solar installation and verified property deals — we make every step transparent."
           />
           <div className="grid md:grid-cols-3 gap-6">
-            <ServiceCard
-              icon={HandHeart}
-              title="CSR Project Management"
-              description="Schools, hospitals, skill centers and women employment programs — execute your CSR with measurable, transparent impact."
-              benefits={["80G tax benefit", "Brand value", "Real social impact"]}
-              to="/services/csr"
-              image={csrImg}
-              imageAlt="Children receiving notebooks at a CSR-supported classroom"
-            />
-            <ServiceCard
-              icon={Sun}
-              title="Solar Energy Solutions"
-              description="End-to-end solar for homes, offices, farms and schools — including subsidy paperwork and net-metering."
-              benefits={["Govt. subsidy support", "Near-zero electricity bills", "5-year warranty"]}
-              to="/services/solar"
-              image={solarImg}
-              imageAlt="Technicians installing rooftop solar panels"
-            />
-            <ServiceCard
-              icon={HomeIcon}
-              title="Property Buy & Sell"
-              description="Verified land, plots and farmhouses with legal verification and registry support — clean documents, no surprises."
-              benefits={["Zero brokerage", "Clean documents", "Registry support"]}
-              to="/services/property"
-              image={propertyImg}
-              imageAlt="Surveyor reviewing land documents on a verified plot"
-            />
+            {(services && services.length > 0
+              ? services
+              : [
+                  { id: "csr", slug: "csr", title: "CSR Project Management", short_description: "Schools, hospitals, skill centers and women employment programs — execute your CSR with measurable, transparent impact.", description: null, icon: "HandHeart", image_url: null, benefits: ["80G tax benefit", "Brand value", "Real social impact"], cta_label: null, cta_link: null, sort_order: 1, published: true },
+                  { id: "solar", slug: "solar", title: "Solar Energy Solutions", short_description: "End-to-end solar for homes, offices, farms and schools — including subsidy paperwork and net-metering.", description: null, icon: "Sun", image_url: null, benefits: ["Govt. subsidy support", "Near-zero electricity bills", "5-year warranty"], cta_label: null, cta_link: null, sort_order: 2, published: true },
+                  { id: "property", slug: "property", title: "Property Buy & Sell", short_description: "Verified land, plots and farmhouses with legal verification and registry support — clean documents, no surprises.", description: null, icon: "Home", image_url: null, benefits: ["Zero brokerage", "Clean documents", "Registry support"], cta_label: null, cta_link: null, sort_order: 3, published: true },
+                ]
+            ).map((s) => {
+              const Icon = ((Icons as any)[s.icon ?? ""] as any) || HandHeart;
+              const img = s.image_url || slugFallback[s.slug] || csrImg;
+              return (
+                <ServiceCard
+                  key={s.id}
+                  icon={Icon}
+                  title={s.title}
+                  description={s.short_description || s.description || ""}
+                  benefits={(s.benefits as string[]) || []}
+                  to={`/services/${s.slug}`}
+                  image={img}
+                  imageAlt={s.title}
+                />
+              );
+            })}
           </div>
         </div>
       </section>
