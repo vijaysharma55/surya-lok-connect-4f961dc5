@@ -158,45 +158,85 @@ function StatusCard({ status, notes }: { status: string; notes: string | null })
 }
 
 function VolunteerCard({ app }: { app: Application }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!cardRef.current) return;
+    setDownloading(true);
+    try {
+      await generateIdCardPDF(cardRef.current, safeFileName(app.full_name));
+      toast.success("ID Card Downloaded Successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate PDF");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
-    <Card className="mt-4 overflow-hidden border-2 border-primary/40 shadow-warm">
-      <div className="bg-foreground text-background px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SunLogo size={22} />
-          <span className="text-xs font-bold tracking-wider">SLKF · VOLUNTEER ID</span>
-        </div>
-        <Badge variant="outline" className="bg-green-500/15 text-green-300 border-green-400/40">Active</Badge>
-      </div>
-      <CardContent className="p-5 sm:p-6">
-        <div className="flex items-start gap-4">
-          <div className="h-24 w-20 sm:h-28 sm:w-24 rounded-md border bg-muted overflow-hidden shrink-0 flex items-center justify-center">
-            {app.photo_url ? (
-              <img src={app.photo_url} alt={app.full_name} className="h-full w-full object-cover" />
-            ) : (
-              <IdCard className="h-8 w-8 text-muted-foreground" />
-            )}
+    <>
+      <Button
+        onClick={handleDownload}
+        disabled={downloading}
+        className="mt-4 w-full sm:w-auto"
+        size="lg"
+      >
+        {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <DownloadCloud className="h-4 w-4" />}
+        {downloading ? "Generating PDF…" : "Download Volunteer ID (PDF)"}
+      </Button>
+
+      <Card className="mt-4 overflow-hidden border-2 border-primary/40 shadow-warm">
+        <div className="bg-foreground text-background px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <SunLogo size={22} />
+            <span className="text-xs font-bold tracking-wider">SLKF · VOLUNTEER ID</span>
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-lg font-bold text-foreground truncate">{app.full_name}</div>
-            <div className="text-sm text-secondary font-semibold">{app.post}</div>
-            <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
-              <div><span className="font-medium text-foreground">District:</span> {app.district}</div>
-              <div><span className="font-medium text-foreground">Block:</span> {app.block}</div>
-              <div><span className="font-medium text-foreground">Panchayat:</span> {app.panchayat}</div>
-              <div><span className="font-medium text-foreground">Mobile:</span> {app.mobile}</div>
+          <Badge variant="outline" className="bg-green-500/15 text-green-300 border-green-400/40">Active</Badge>
+        </div>
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <div className="h-24 w-20 sm:h-28 sm:w-24 rounded-md border bg-muted overflow-hidden shrink-0 flex items-center justify-center">
+              {app.photo_url ? (
+                <img src={app.photo_url} alt={app.full_name} className="h-full w-full object-cover" />
+              ) : (
+                <IdCard className="h-8 w-8 text-muted-foreground" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-lg font-bold text-foreground truncate">{app.full_name}</div>
+              <div className="text-sm text-secondary font-semibold">{app.post}</div>
+              <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-muted-foreground">
+                <div><span className="font-medium text-foreground">District:</span> {app.district}</div>
+                <div><span className="font-medium text-foreground">Block:</span> {app.block}</div>
+                <div><span className="font-medium text-foreground">Panchayat:</span> {app.panchayat}</div>
+                <div><span className="font-medium text-foreground">Mobile:</span> {app.mobile}</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs">
-          <div className="font-mono font-semibold">{app.application_code}</div>
-          <div className="text-muted-foreground">
-            Approved {app.approved_at ? new Date(app.approved_at).toLocaleDateString() : "—"}
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs">
+            <div className="font-mono font-semibold">{app.application_code}</div>
+            <div className="text-muted-foreground">
+              Approved {app.approved_at ? new Date(app.approved_at).toLocaleDateString() : "—"}
+            </div>
           </div>
-        </div>
-        <Button variant="outline" size="sm" className="mt-4 w-full" onClick={() => window.print()}>
-          <Download className="h-4 w-4" /> Print / Save ID
-        </Button>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Hidden printable ID card — rendered off-screen for html2canvas */}
+      <div
+        aria-hidden
+        style={{
+          position: "fixed",
+          left: -10000,
+          top: 0,
+          pointerEvents: "none",
+          opacity: 0,
+        }}
+      >
+        <IDCardTemplate ref={cardRef} data={app} />
+      </div>
+    </>
   );
 }
