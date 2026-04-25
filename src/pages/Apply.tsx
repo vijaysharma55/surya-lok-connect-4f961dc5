@@ -68,6 +68,7 @@ export default function Apply() {
   const [done, setDone] = useState<{ code: string } | null>(null);
   const [locations, setLocations] = useState<Loc[]>([]);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -118,6 +119,8 @@ export default function Apply() {
       const screenshot_url = await uploadToMedia(screenshotFile, "screenshot");
       let photo_url: string | null = null;
       if (photoFile) photo_url = await uploadToMedia(photoFile, "photo");
+      let aadhaar_image_url: string | null = null;
+      if (aadhaarFile) aadhaar_image_url = await uploadToMedia(aadhaarFile, "aadhaar");
 
       const { data, error } = await supabase
         .from("applications")
@@ -133,7 +136,10 @@ export default function Apply() {
           transaction_id: parsed.data.transaction_id,
           payment_screenshot_url: screenshot_url,
           payment_amount: FEE,
+          expected_amount: FEE,
+          amount_paid: FEE,
           photo_url,
+          aadhaar_image_url,
         })
         .select("application_code")
         .single();
@@ -142,6 +148,7 @@ export default function Apply() {
       setDone({ code: data!.application_code as string });
       setForm(initial);
       setPhotoFile(null);
+      setAadhaarFile(null);
       setScreenshotFile(null);
     } catch (err: any) {
       toast.error(err.message ?? "Submission failed");
@@ -271,18 +278,27 @@ export default function Apply() {
                 </RadioGroup>
               </div>
 
-              {/* PHOTO */}
+              {/* PHOTO + AADHAAR IMAGE */}
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-                  Passport photo (for ID card)
+                  Identity documents
                 </h3>
-                <FileField
-                  label="Upload your photo"
-                  accept="image/*"
-                  file={photoFile}
-                  onChange={setPhotoFile}
-                  hint="JPG/PNG, under 5 MB. Used on your Volunteer ID card."
-                />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <FileField
+                    label="Passport photo (for ID card)"
+                    accept="image/*"
+                    file={photoFile}
+                    onChange={setPhotoFile}
+                    hint="JPG/PNG, under 5 MB."
+                  />
+                  <FileField
+                    label="Aadhaar card image"
+                    accept="image/*"
+                    file={aadhaarFile}
+                    onChange={setAadhaarFile}
+                    hint="Front side of Aadhaar. JPG/PNG, under 5 MB."
+                  />
+                </div>
               </div>
 
               {/* PAYMENT */}

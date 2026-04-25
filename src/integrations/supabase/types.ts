@@ -17,13 +17,16 @@ export type Database = {
       applications: {
         Row: {
           aadhaar: string
+          aadhaar_image_url: string | null
           admin_notes: string | null
+          amount_paid: number
           application_code: string
           approved_at: string | null
           block: string
           created_at: string
           district: string
           email: string | null
+          expected_amount: number
           full_name: string
           id: string
           mobile: string
@@ -38,13 +41,16 @@ export type Database = {
         }
         Insert: {
           aadhaar: string
+          aadhaar_image_url?: string | null
           admin_notes?: string | null
+          amount_paid?: number
           application_code?: string
           approved_at?: string | null
           block: string
           created_at?: string
           district: string
           email?: string | null
+          expected_amount?: number
           full_name: string
           id?: string
           mobile: string
@@ -59,13 +65,16 @@ export type Database = {
         }
         Update: {
           aadhaar?: string
+          aadhaar_image_url?: string | null
           admin_notes?: string | null
+          amount_paid?: number
           application_code?: string
           approved_at?: string | null
           block?: string
           created_at?: string
           district?: string
           email?: string | null
+          expected_amount?: number
           full_name?: string
           id?: string
           mobile?: string
@@ -77,6 +86,33 @@ export type Database = {
           status?: string
           transaction_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      coordinator_assignments: {
+        Row: {
+          block: string | null
+          created_at: string
+          district: string
+          id: string
+          panchayat: string | null
+          user_id: string
+        }
+        Insert: {
+          block?: string | null
+          created_at?: string
+          district: string
+          id?: string
+          panchayat?: string | null
+          user_id: string
+        }
+        Update: {
+          block?: string | null
+          created_at?: string
+          district?: string
+          id?: string
+          panchayat?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -198,39 +234,54 @@ export type Database = {
       }
       memberships: {
         Row: {
+          aadhaar: string | null
           address: string | null
+          amount_paid: number
           created_at: string
+          district: string | null
           email: string | null
+          expected_amount: number
           full_name: string
           id: string
           membership_type: string
           notes: string | null
           payment_status: string
           phone_number: string
+          status: string
           updated_at: string
         }
         Insert: {
+          aadhaar?: string | null
           address?: string | null
+          amount_paid?: number
           created_at?: string
+          district?: string | null
           email?: string | null
+          expected_amount?: number
           full_name: string
           id?: string
           membership_type?: string
           notes?: string | null
           payment_status?: string
           phone_number: string
+          status?: string
           updated_at?: string
         }
         Update: {
+          aadhaar?: string | null
           address?: string | null
+          amount_paid?: number
           created_at?: string
+          district?: string | null
           email?: string | null
+          expected_amount?: number
           full_name?: string
           id?: string
           membership_type?: string
           notes?: string | null
           payment_status?: string
           phone_number?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -384,6 +435,36 @@ export type Database = {
           sort_order?: number
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      roles_catalog: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          key: string
+          label: string
+          level: number
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          key: string
+          label: string
+          level?: number
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          key?: string
+          label?: string
+          level?: number
+          sort_order?: number
         }
         Relationships: []
       }
@@ -590,6 +671,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_coordinator_for_district: {
+        Args: { _district: string; _user_id: string }
         Returns: boolean
       }
     }
