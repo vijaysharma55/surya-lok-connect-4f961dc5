@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Save, Plus, Trash2 } from "lucide-react";
 import { MediaPicker } from "@/components/admin/MediaPicker";
 
-type NavLink = { label: string; href: string };
+type NavLink = { label: string; to: string };
 type Settings = {
   id: string;
   site_name: string | null;
@@ -60,7 +60,7 @@ export default function AdminHeaderFooter() {
     arr[i] = { ...arr[i], ...patch };
     update({ nav_links: arr });
   };
-  const addNav = () => update({ nav_links: [...(s.nav_links ?? []), { label: "New", href: "/" }] });
+  const addNav = () => update({ nav_links: [...(s.nav_links ?? []), { label: "New", to: "/" }] });
   const removeNav = (i: number) => update({ nav_links: (s.nav_links ?? []).filter((_, idx) => idx !== i) });
 
   const updatePhone = (i: number, v: string) => {
@@ -90,7 +90,7 @@ export default function AdminHeaderFooter() {
             {(s.nav_links ?? []).map((n, i) => (
               <div key={i} className="flex gap-2">
                 <Input placeholder="Label" value={n.label} onChange={(e) => updateNav(i, { label: e.target.value })} />
-                <Input placeholder="/path" value={n.href} onChange={(e) => updateNav(i, { href: e.target.value })} />
+                <Input placeholder="/path" value={n.to} onChange={(e) => updateNav(i, { to: e.target.value })} />
                 <Button variant="ghost" size="icon" onClick={() => removeNav(i)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
               </div>
             ))}
