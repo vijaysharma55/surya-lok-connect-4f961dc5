@@ -5,8 +5,9 @@ import { SITE, telLink, waLink } from "@/lib/site";
 import { SunLogo } from "@/components/SunLogo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/useCms";
 
-const navItems = [
+const defaultNav = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/services", label: "Services" },
@@ -16,6 +17,18 @@ const navItems = [
 
 export const Header = () => {
   const [open, setOpen] = useState(false);
+  const settings = useSiteSettings();
+  const navItems = settings?.nav_links?.length ? settings.nav_links : defaultNav;
+  const siteName = settings?.site_name || SITE.name;
+  const tagline = settings?.brand_tagline || "CSR • Solar • Property — Mithapur, Patna";
+  const phones = settings?.phones?.length ? settings.phones : SITE.phones;
+  const email = settings?.email || SITE.email;
+  const compliance = settings?.compliance?.length ? settings.compliance : SITE.compliance;
+  const logoUrl = settings?.logo_url;
+  const waNumber = settings?.whatsapp_number;
+  const waHref = waNumber
+    ? `https://wa.me/${waNumber}?text=${encodeURIComponent("Hello SLKF, I'd like to know more about your services.")}`
+    : waLink("Hello SLKF, I'd like to know more about your services.");
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border shadow-card">
