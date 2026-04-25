@@ -240,6 +240,43 @@ async function main() {
   await finish();
 }
 
+function toCsv(rows: Result[]) {
+  const header = ["flow", "actor", "expected", "actual", "pass", "policy", "error"];
+  const esc = (v: any) => {
+    const s = v == null ? "" : String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  return [
+    header.join(","),
+    ...rows.map((r) => header.map((h) => esc((r as any)[h])).join(",")),
+  ].join("\n");
+}
+
+async function uploadReport(report: any, csv: string) {
+  const ts = new Date().toISOString().replace(/[:.]/g, "-");
+  const base = `rls-reports/${ts}`;
+  const json = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+  const csvBlob = new Blob([csv], { type: "text/csv" });
+  const a = await admin.storage.from("documents").upload(`${base}/report.json`, json, {
+    contentType: "application/json",
+    upsert: true,
+  });
+  const b = await admin.storage.from("documents").upload(`${base}/report.csv`, csvBlob, {
+    contentType: "text/csv",
+    upsert: true,
+  });
+  // Latest pointer
+  const c = await admin.storage.from("documents").upload(`rls-reports/latest.json`, json, {
+    contentType: "application/json",
+    upsert: true,
+  });
+  if (a.error || b.error || c.error) {
+    console.log("upload errors:", a.error?.message, b.error?.message, c.error?.message);
+  } else {
+    console.log(`📤 Uploaded report to documents/${base}/`);
+  }
+}
+
 async function finish() {
   // Cleanup: delete tagged rows + harness users
   console.log("\n— Cleanup —");
@@ -254,9 +291,19 @@ async function finish() {
     }
   }
 
-  // Summary
   const passed = results.filter((r) => r.pass).length;
   const failed = results.length - passed;
+  const report = {
+    run_id: RUN_ID,
+    generated_at: new Date().toISOString(),
+    total: results.length,
+    passed,
+    failed,
+    results,
+  };
+  const csv = toCsv(results);
+  await uploadReport(report, csv);
+
   console.log(`\n— Summary — ${passed} passed, ${failed} failed (of ${results.length})`);
   if (failed > 0) {
     console.log("\nFailures:");
