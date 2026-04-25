@@ -1,27 +1,21 @@
 import { Helmet } from "react-helmet-async";
-import { SITE } from "@/lib/site";
 
-interface SeoProps {
-  title: string;
-  description: string;
-  path?: string;
-  image?: string;
-}
-
-export const Seo = ({ title, description, path = "/", image }: SeoProps) => {
-  const fullTitle = title.includes(SITE.shortName) ? title : `${title} | ${SITE.name}`;
-  const url = `${SITE.url}${path}`;
-  return (
-    <Helmet>
-      <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      <link rel="canonical" href={url} />
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={url} />
-      <meta property="og:type" content="website" />
-      {image && <meta property="og:image" content={image} />}
-      <meta name="twitter:card" content="summary_large_image" />
-    </Helmet>
-  );
+type Props = {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  noIndex?: boolean;
 };
+
+export const Seo = ({ title, description, canonical, ogImage, noIndex }: Props) => (
+  <Helmet>
+    {title && <title>{title}</title>}
+    {description && <meta name="description" content={description} />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    {noIndex && <meta name="robots" content="noindex,nofollow" />}
+    {title && <meta property="og:title" content={title} />}
+    {description && <meta property="og:description" content={description} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+  </Helmet>
+);
