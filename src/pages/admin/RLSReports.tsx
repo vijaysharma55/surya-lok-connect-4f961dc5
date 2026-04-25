@@ -284,9 +284,21 @@ export default function RLSReportsPage() {
               <div className="flex items-center gap-2 ml-auto">
                 <Button variant="outline" size="sm" onClick={loadRuns} className="gap-2"><RefreshCcw className="h-4 w-4" /> Refresh</Button>
                 {compareMode ? (
-                  <Button variant="outline" size="sm" onClick={downloadDiffCsv} disabled={!diff} className="gap-2">
-                    <Download className="h-4 w-4" /> Diff CSV
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      onClick={notifyRegressions}
+                      disabled={!diff || regressionCount === 0 || notifying}
+                      variant={regressionCount > 0 ? "destructive" : "outline"}
+                      className="gap-2"
+                    >
+                      {notifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                      Email regressions{regressionCount > 0 ? ` (${regressionCount})` : ""}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadDiffCsv} disabled={!diff} className="gap-2">
+                      <Download className="h-4 w-4" /> Diff CSV
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button variant="outline" size="sm" onClick={downloadJSON} disabled={!report} className="gap-2"><Download className="h-4 w-4" /> JSON</Button>
