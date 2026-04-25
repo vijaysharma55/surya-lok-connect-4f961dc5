@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/compressImage";
 import { toast } from "sonner";
 import { CheckCircle2, IndianRupee, Upload, ShieldCheck, UserPlus } from "lucide-react";
 
@@ -53,9 +54,12 @@ const FEE = 101;
 const UPI_ID = "suryalokfoundation@upi";
 
 async function uploadToMedia(file: File, prefix: string): Promise<string> {
-  const ext = file.name.split(".").pop() || "jpg";
+  const compressed = await compressImage(file);
+  const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
   const path = `applications/${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error: upErr } = await supabase.storage.from("media").upload(path, file, { contentType: file.type });
+  const { error: upErr } = await supabase.storage
+    .from("media")
+    .upload(path, compressed, { contentType: compressed.type || "image/jpeg" });
   if (upErr) throw upErr;
   const { data: { publicUrl } } = supabase.storage.from("media").getPublicUrl(path);
   return publicUrl;
