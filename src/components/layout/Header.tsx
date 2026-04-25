@@ -121,6 +121,7 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallAppButton variant="outline" size="sm" className="hidden md:inline-flex" />
           <Button
             asChild
             variant="outline"
