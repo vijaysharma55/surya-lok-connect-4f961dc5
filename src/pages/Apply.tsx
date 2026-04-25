@@ -278,18 +278,27 @@ export default function Apply() {
                 </RadioGroup>
               </div>
 
-              {/* PHOTO */}
+              {/* PHOTO + AADHAAR IMAGE */}
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-                  Passport photo (for ID card)
+                  Identity documents
                 </h3>
-                <FileField
-                  label="Upload your photo"
-                  accept="image/*"
-                  file={photoFile}
-                  onChange={setPhotoFile}
-                  hint="JPG/PNG, under 5 MB. Used on your Volunteer ID card."
-                />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <FileField
+                    label="Passport photo (for ID card)"
+                    accept="image/*"
+                    file={photoFile}
+                    onChange={setPhotoFile}
+                    hint="JPG/PNG, under 5 MB."
+                  />
+                  <FileField
+                    label="Aadhaar card image"
+                    accept="image/*"
+                    file={aadhaarFile}
+                    onChange={setAadhaarFile}
+                    hint="Front side of Aadhaar. JPG/PNG, under 5 MB."
+                  />
+                </div>
               </div>
 
               {/* PAYMENT */}
