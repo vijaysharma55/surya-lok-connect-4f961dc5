@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Seo } from "@/components/Seo";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 import {
   Tabs,
   TabsContent,
