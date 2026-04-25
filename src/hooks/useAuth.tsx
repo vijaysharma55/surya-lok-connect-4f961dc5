@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loadRolesFor = async (uid: string, opts?: { refreshSession?: boolean }) => {
     if (opts?.refreshSession) {
       await supabase.auth.refreshSession();
+      roleDebug.emit("session-refreshed");
     }
     const [roleRes, assignRes] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
@@ -42,11 +43,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     ]);
     const nextIsAdmin = !!roleRes.data;
     const nextDistricts = Array.from(new Set((assignRes.data ?? []).map((r: any) => r.district as string))).sort();
-    // Only update state if values actually changed (prevents flicker)
-    setIsAdmin((prev) => (prev === nextIsAdmin ? prev : nextIsAdmin));
+    roleDebug.emit("fetched", `admin=${nextIsAdmin} districts=[${nextDistricts.join(",")}]`);
+
+    let changed = false;
+    setIsAdmin((prev) => {
+      if (prev === nextIsAdmin) return prev;
+      changed = true;
+      return nextIsAdmin;
+    });
     setCoordinatorDistricts((prev) => {
-      if (prev.length === nextDistricts.length && prev.every((d, i) => d === nextDistricts[i])) return prev;
+      const same = prev.length === nextDistricts.length && prev.every((d, i) => d === nextDistricts[i]);
+      if (same) return prev;
+      changed = true;
       return nextDistricts;
+    });
+    // Defer to next tick so the `changed` flag is final after both setters run
+    queueMicrotask(() => {
+      if (changed) roleDebug.emit("applied", `admin=${nextIsAdmin}`);
+      else roleDebug.emit("skipped-unchanged");
     });
   };
 
