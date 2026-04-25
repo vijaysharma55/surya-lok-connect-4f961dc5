@@ -23,6 +23,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
 import AdminServices from "./pages/admin/Services";
+import AdminProjects from "./pages/admin/Projects";
 import AdminPages from "./pages/admin/Pages";
 import AdminMedia from "./pages/admin/Media";
 import AdminSeo from "./pages/admin/Seo";
@@ -52,6 +53,7 @@ const Shell = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/leads" element={<AdminLeads />} />
           <Route path="/admin/services" element={<AdminServices />} />
+          <Route path="/admin/projects" element={<AdminProjects />} />
           <Route path="/admin/pages" element={<AdminPages />} />
           <Route path="/admin/media" element={<AdminMedia />} />
           <Route path="/admin/seo" element={<AdminSeo />} />

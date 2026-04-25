@@ -49,10 +49,10 @@ export default function AdminHeaderFooter() {
   const update = (patch: Partial<Settings>) => setS({ ...s, ...patch });
 
   const save = async () => {
-    const { id, ...rest } = s;
-    const { error } = await supabase.from("site_settings").update(rest).eq("id", "global");
+    const payload = { ...s, id: "global" };
+    const { error } = await supabase.from("site_settings").upsert(payload, { onConflict: "id" });
     if (error) return toast.error(error.message);
-    toast.success("Saved");
+    toast.success("Header & footer saved");
   };
 
   const updateNav = (i: number, patch: Partial<NavLink>) => {

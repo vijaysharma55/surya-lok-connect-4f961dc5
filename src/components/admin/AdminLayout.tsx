@@ -34,6 +34,7 @@ const items = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
   { title: "Pages", url: "/admin/pages", icon: FileText },
   { title: "Services", url: "/admin/services", icon: Wrench },
+  { title: "Projects", url: "/admin/projects", icon: ImageIcon },
   { title: "Media", url: "/admin/media", icon: ImageIcon },
   { title: "Leads", url: "/admin/leads", icon: Inbox },
   { title: "SEO", url: "/admin/seo", icon: Search },
