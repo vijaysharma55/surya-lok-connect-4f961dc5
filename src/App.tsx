@@ -42,7 +42,7 @@ const Shell = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {!isBare && <Header />}
-      <main className="flex-1">
+      <main className={`flex-1 ${!isBare ? "pb-[calc(env(safe-area-inset-bottom)+64px)] md:pb-0" : ""}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
