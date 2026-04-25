@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   ExternalLink,
+  FileArchive,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { RoleDebugPanel } from "@/components/admin/RoleDebugPanel";
