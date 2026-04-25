@@ -1,5 +1,6 @@
 import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
 import { Seo } from "@/components/Seo";
+import { breadcrumbJsonLd, contactPageJsonLd } from "@/lib/jsonld";
 import { ContactForm } from "@/components/ContactForm";
 import { Button } from "@/components/ui/button";
 import { SITE, telLink, waLink } from "@/lib/site";
