@@ -57,7 +57,7 @@ export default function MyProfile() {
       const { data, error } = await supabase
         .from("applications")
         .select(
-          "id,application_code,full_name,mobile,aadhaar,email,district,block,panchayat,post,status,photo_url,admin_notes,approved_at,created_at",
+          "id,application_code,full_name,mobile,aadhaar,email,district,block,panchayat,post,status,photo_url,admin_notes,approved_at,created_at,id_card_downloaded_at",
         )
         .eq("claimed_by", user.id)
         .order("created_at", { ascending: false })
