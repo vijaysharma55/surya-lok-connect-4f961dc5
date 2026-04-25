@@ -6,6 +6,7 @@ import { SunLogo } from "@/components/SunLogo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/useCms";
+import { MobileSidebar } from "@/components/layout/MobileSidebar";
 
 const defaultNav = [
   { to: "/", label: "Home" },
@@ -32,17 +33,20 @@ export const Header = () => {
 
   return (
     <>
-      {/* Minimal mobile top bar — logo only. Primary nav lives in MobileBottomNav. */}
+      {/* Mobile top bar — hamburger (left), logo (center). Primary nav lives in MobileBottomNav. */}
       <header className="md:hidden sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
-        <div className="container-tight flex items-center justify-center py-2.5">
-          <Link to="/" className="flex items-center gap-2">
+        <div className="container-tight flex items-center justify-between py-2.5 gap-2">
+          <MobileSidebar />
+          <Link to="/" className="flex items-center gap-2 min-w-0">
             {logoUrl ? (
               <img src={logoUrl} alt={siteName} className="h-8 w-8 rounded object-contain" />
             ) : (
               <SunLogo size={32} />
             )}
-            <span className="font-semibold text-foreground text-sm">{siteName}</span>
+            <span className="font-semibold text-foreground text-sm truncate">{siteName}</span>
           </Link>
+          {/* Spacer to balance hamburger so logo stays visually centered */}
+          <div className="w-9 shrink-0" aria-hidden />
         </div>
       </header>
 
