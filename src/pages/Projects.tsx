@@ -90,6 +90,11 @@ const Projects = () => {
         title="Projects & Gallery — SLKF"
         description="Photos of SLKF activities across CSR, solar installations, property deals and team work in Patna, Bihar."
         path="/projects"
+        keywords={["SLKF projects", "NGO gallery Bihar", "CSR projects Patna", "solar installations gallery"]}
+        jsonLd={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Projects", path: "/projects" },
+        ])}
       />
 
       <section className="gradient-warm">
