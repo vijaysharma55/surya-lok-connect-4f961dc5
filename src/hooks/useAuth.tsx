@@ -31,14 +31,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [coordinatorDistricts, setCoordinatorDistricts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadRolesFor = async (uid: string) => {
+  const loadRolesFor = async (uid: string, opts?: { refreshSession?: boolean }) => {
+    if (opts?.refreshSession) {
+      await supabase.auth.refreshSession();
+    }
     const [roleRes, assignRes] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", uid).eq("role", "admin").maybeSingle(),
       supabase.from("coordinator_assignments").select("district").eq("user_id", uid),
     ]);
-    setIsAdmin(!!roleRes.data);
-    const districts = Array.from(new Set((assignRes.data ?? []).map((r: any) => r.district as string)));
-    setCoordinatorDistricts(districts);
+    const nextIsAdmin = !!roleRes.data;
+    const nextDistricts = Array.from(new Set((assignRes.data ?? []).map((r: any) => r.district as string))).sort();
+    // Only update state if values actually changed (prevents flicker)
+    setIsAdmin((prev) => (prev === nextIsAdmin ? prev : nextIsAdmin));
+    setCoordinatorDistricts((prev) => {
+      if (prev.length === nextDistricts.length && prev.every((d, i) => d === nextDistricts[i])) return prev;
+      return nextDistricts;
+    });
   };
 
   useEffect(() => {
@@ -47,8 +55,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let pollId: ReturnType<typeof setInterval> | null = null;
     let currentUid: string | null = null;
 
+    // Debounced + batched reload — coalesces bursts of role events into a single
+    // refreshSession + role-fetch, eliminating UI flicker on rapid updates.
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let pendingNeedsSessionRefresh = false;
+    let inFlight: Promise<void> | null = null;
+    let rerunAfter = false;
+    const DEBOUNCE_MS = 250;
+
+    const runReload = async (uid: string) => {
+      const needsRefresh = pendingNeedsSessionRefresh;
+      pendingNeedsSessionRefresh = false;
+      try {
+        await loadRolesFor(uid, { refreshSession: needsRefresh });
+      } finally {
+        if (rerunAfter) {
+          rerunAfter = false;
+          inFlight = runReload(uid);
+        } else {
+          inFlight = null;
+        }
+      }
+    };
+
+    const scheduleReload = (opts?: { refreshSession?: boolean; immediate?: boolean }) => {
+      if (!currentUid) return;
+      if (opts?.refreshSession) pendingNeedsSessionRefresh = true;
+
+      const fire = () => {
+        debounceTimer = null;
+        if (!currentUid) return;
+        if (inFlight) {
+          rerunAfter = true; // collapse further events into one extra run
+        } else {
+          inFlight = runReload(currentUid);
+        }
+      };
+
+      if (opts?.immediate) {
+        if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+        fire();
+        return;
+      }
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fire, DEBOUNCE_MS);
+    };
+
     const subscribeForUser = (uid: string) => {
-      // Tear down any prior subscriptions
       if (rolesChannel) supabase.removeChannel(rolesChannel);
       if (assignChannel) supabase.removeChannel(assignChannel);
 
@@ -57,10 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${uid}` },
-          async () => {
-            await supabase.auth.refreshSession();
-            loadRolesFor(uid);
-          }
+          () => scheduleReload({ refreshSession: true })
         )
         .subscribe();
 
@@ -69,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "coordinator_assignments", filter: `user_id=eq.${uid}` },
-          () => loadRolesFor(uid)
+          () => scheduleReload()
         )
         .subscribe();
     };
@@ -79,10 +129,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(s?.user ?? null);
       if (s?.user) {
         currentUid = s.user.id;
-        setTimeout(() => loadRolesFor(s.user.id), 0);
+        setTimeout(() => scheduleReload({ immediate: true }), 0);
         subscribeForUser(s.user.id);
       } else {
         currentUid = null;
+        if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+        rerunAfter = false;
+        pendingNeedsSessionRefresh = false;
         setIsAdmin(false);
         setCoordinatorDistricts([]);
         if (rolesChannel) { supabase.removeChannel(rolesChannel); rolesChannel = null; }
@@ -108,12 +161,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     // Periodic safety-net refresh (every 30s) in case realtime drops
-    pollId = setInterval(() => {
-      if (currentUid) loadRolesFor(currentUid);
-    }, 30000);
+    pollId = setInterval(() => scheduleReload(), 30000);
 
     // Re-check whenever the tab regains focus
-    const onFocus = () => { if (currentUid) loadRolesFor(currentUid); };
+    const onFocus = () => scheduleReload();
     window.addEventListener("focus", onFocus);
 
     return () => {
@@ -121,6 +172,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (rolesChannel) supabase.removeChannel(rolesChannel);
       if (assignChannel) supabase.removeChannel(assignChannel);
       if (pollId) clearInterval(pollId);
+      if (debounceTimer) clearTimeout(debounceTimer);
       window.removeEventListener("focus", onFocus);
     };
   }, []);
