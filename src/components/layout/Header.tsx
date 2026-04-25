@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/useCms";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 const defaultNav = [
   { to: "/", label: "Home" },
@@ -45,8 +46,7 @@ export const Header = () => {
             )}
             <span className="font-semibold text-foreground text-sm truncate">{siteName}</span>
           </Link>
-          {/* Spacer to balance hamburger so logo stays visually centered */}
-          <div className="w-9 shrink-0" aria-hidden />
+          <InstallAppButton variant="ghost" size="sm" className="px-2" />
         </div>
       </header>
 
@@ -120,6 +120,7 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallAppButton variant="outline" size="sm" className="hidden md:inline-flex" />
           <Button
             asChild
             variant="outline"
