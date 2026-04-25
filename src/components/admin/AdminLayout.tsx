@@ -30,18 +30,19 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-const items = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
-  { title: "Pages", url: "/admin/pages", icon: FileText },
-  { title: "Services", url: "/admin/services", icon: Wrench },
-  { title: "Projects", url: "/admin/projects", icon: ImageIcon },
-  { title: "Media", url: "/admin/media", icon: ImageIcon },
-  { title: "Applications", url: "/admin/applications", icon: Inbox },
-  { title: "Members", url: "/admin/members", icon: Inbox },
-  { title: "Leads", url: "/admin/leads", icon: Inbox },
-  { title: "SEO", url: "/admin/seo", icon: Search },
-  { title: "Header & Footer", url: "/admin/header-footer", icon: PanelTop },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
+const allItems = [
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true, adminOnly: false },
+  { title: "Members", url: "/admin/members", icon: Inbox, adminOnly: false },
+  { title: "Volunteers", url: "/admin/applications", icon: Inbox, adminOnly: false },
+  { title: "Coordinators", url: "/admin/coordinators", icon: Inbox, adminOnly: true },
+  { title: "Pages", url: "/admin/pages", icon: FileText, adminOnly: true },
+  { title: "Services", url: "/admin/services", icon: Wrench, adminOnly: true },
+  { title: "Projects", url: "/admin/projects", icon: ImageIcon, adminOnly: true },
+  { title: "Media", url: "/admin/media", icon: ImageIcon, adminOnly: true },
+  { title: "Leads", url: "/admin/leads", icon: Inbox, adminOnly: true },
+  { title: "SEO", url: "/admin/seo", icon: Search, adminOnly: true },
+  { title: "Header & Footer", url: "/admin/header-footer", icon: PanelTop, adminOnly: true },
+  { title: "Settings", url: "/admin/settings", icon: Settings, adminOnly: true },
 ];
 
 function AdminSidebar() {
