@@ -42,25 +42,63 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    let rolesChannel: ReturnType<typeof supabase.channel> | null = null;
+    let assignChannel: ReturnType<typeof supabase.channel> | null = null;
+    let pollId: ReturnType<typeof setInterval> | null = null;
+    let currentUid: string | null = null;
+
+    const subscribeForUser = (uid: string) => {
+      // Tear down any prior subscriptions
+      if (rolesChannel) supabase.removeChannel(rolesChannel);
+      if (assignChannel) supabase.removeChannel(assignChannel);
+
+      rolesChannel = supabase
+        .channel(`user_roles:${uid}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "user_roles", filter: `user_id=eq.${uid}` },
+          async () => {
+            await supabase.auth.refreshSession();
+            loadRolesFor(uid);
+          }
+        )
+        .subscribe();
+
+      assignChannel = supabase
+        .channel(`coord_assign:${uid}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "coordinator_assignments", filter: `user_id=eq.${uid}` },
+          () => loadRolesFor(uid)
+        )
+        .subscribe();
+    };
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
+        currentUid = s.user.id;
         setTimeout(() => loadRolesFor(s.user.id), 0);
+        subscribeForUser(s.user.id);
       } else {
+        currentUid = null;
         setIsAdmin(false);
         setCoordinatorDistricts([]);
+        if (rolesChannel) { supabase.removeChannel(rolesChannel); rolesChannel = null; }
+        if (assignChannel) { supabase.removeChannel(assignChannel); assignChannel = null; }
       }
     });
 
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {
-      // Force a refresh so we always pick up the latest role assignments
       if (s?.user) {
         const { data: refreshed } = await supabase.auth.refreshSession();
         const cur = refreshed.session ?? s;
         setSession(cur);
         setUser(cur.user ?? null);
+        currentUid = cur.user!.id;
         await loadRolesFor(cur.user!.id);
+        subscribeForUser(cur.user!.id);
         setLoading(false);
       } else {
         setSession(null);
@@ -69,7 +107,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    return () => sub.subscription.unsubscribe();
+    // Periodic safety-net refresh (every 30s) in case realtime drops
+    pollId = setInterval(() => {
+      if (currentUid) loadRolesFor(currentUid);
+    }, 30000);
+
+    // Re-check whenever the tab regains focus
+    const onFocus = () => { if (currentUid) loadRolesFor(currentUid); };
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      sub.subscription.unsubscribe();
+      if (rolesChannel) supabase.removeChannel(rolesChannel);
+      if (assignChannel) supabase.removeChannel(assignChannel);
+      if (pollId) clearInterval(pollId);
+      window.removeEventListener("focus", onFocus);
+    };
   }, []);
 
   const signOut = async () => {
