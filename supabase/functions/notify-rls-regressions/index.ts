@@ -158,31 +158,39 @@ serve(async (req) => {
 
   const { subject, html, text } = buildEmail(body, regressions, stillFailing);
 
-  const resp = await fetch(`${GATEWAY_URL}/emails`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": RESEND_API_KEY,
-    },
-    body: JSON.stringify({
-      from: "SLKF RLS Monitor <onboarding@resend.dev>",
-      to: recipients,
-      subject,
-      html,
-      text,
+  // Send one email per recipient so a single rejection (e.g. Resend test-mode
+  // restriction) doesn't block delivery to the others.
+  const sends = await Promise.all(
+    recipients.map(async (to) => {
+      const r = await fetch(`${GATEWAY_URL}/emails`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": RESEND_API_KEY,
+        },
+        body: JSON.stringify({
+          from: "SLKF RLS Monitor <onboarding@resend.dev>",
+          to: [to],
+          subject,
+          html,
+          text,
+        }),
+      });
+      const data = await r.json().catch(() => ({}));
+      return { to, ok: r.ok, status: r.status, data };
     }),
-  });
-  const data = await resp.json().catch(() => ({}));
-  if (!resp.ok) {
-    console.error("Resend error", resp.status, data);
-    return json({ error: `Resend ${resp.status}`, details: data }, 502);
-  }
+  );
+
+  const sent = sends.filter((s) => s.ok).length;
+  const failed = sends.filter((s) => !s.ok);
+  if (failed.length) console.warn("notify-rls-regressions partial failures:", failed);
 
   return json({
     ok: true,
-    sent: recipients.length,
-    recipients,
+    sent,
+    attempted: recipients.length,
+    failed: failed.map((f) => ({ to: f.to, status: f.status, error: f.data })),
     regressions: regressions.length,
     still_failing: stillFailing.length,
   });
