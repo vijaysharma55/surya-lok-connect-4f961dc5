@@ -93,16 +93,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    const scheduleReload = (opts?: { refreshSession?: boolean; immediate?: boolean }) => {
+    const scheduleReload = (opts?: { refreshSession?: boolean; immediate?: boolean; reason?: string }) => {
       if (!currentUid) return;
       if (opts?.refreshSession) pendingNeedsSessionRefresh = true;
+      roleDebug.emit("scheduled", `${opts?.reason ?? "event"}${opts?.immediate ? " (immediate)" : ""}`);
 
       const fire = () => {
         debounceTimer = null;
         if (!currentUid) return;
         if (inFlight) {
           rerunAfter = true; // collapse further events into one extra run
+          roleDebug.emit("coalesced", "queued after in-flight reload");
         } else {
+          roleDebug.emit("fired");
           inFlight = runReload(currentUid);
         }
       };
@@ -112,7 +115,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         fire();
         return;
       }
-      if (debounceTimer) clearTimeout(debounceTimer);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        roleDebug.emit("debounced", `reset ${DEBOUNCE_MS}ms`);
+      }
       debounceTimer = setTimeout(fire, DEBOUNCE_MS);
     };
 
