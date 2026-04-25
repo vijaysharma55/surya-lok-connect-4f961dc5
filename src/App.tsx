@@ -28,6 +28,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
 import AdminMembers from "./pages/admin/Members";
 import AdminApplications from "./pages/admin/Applications";
+import AdminCoordinators from "./pages/admin/Coordinators";
 import AdminServices from "./pages/admin/Services";
 import AdminProjects from "./pages/admin/Projects";
 import AdminPages from "./pages/admin/Pages";
@@ -63,6 +64,7 @@ const Shell = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/members" element={<AdminMembers />} />
           <Route path="/admin/applications" element={<AdminApplications />} />
+          <Route path="/admin/coordinators" element={<AdminCoordinators />} />
           <Route path="/admin/leads" element={<AdminLeads />} />
           <Route path="/admin/services" element={<AdminServices />} />
           <Route path="/admin/projects" element={<AdminProjects />} />

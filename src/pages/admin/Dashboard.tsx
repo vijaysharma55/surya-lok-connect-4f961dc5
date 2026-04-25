@@ -2,34 +2,42 @@ import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Inbox, Wrench, FileText, Image as ImageIcon } from "lucide-react";
+import { Users, UserCheck, AlertCircle, IndianRupee, Inbox } from "lucide-react";
 import { Link } from "react-router-dom";
 
-type Stats = { leads: number; services: number; pages: number; media: number };
+type Stats = { members: number; volunteers: number; pending: number; revenue: number; leads: number };
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats>({ leads: 0, services: 0, pages: 0, media: 0 });
+  const [stats, setStats] = useState<Stats>({ members: 0, volunteers: 0, pending: 0, revenue: 0, leads: 0 });
   const [recent, setRecent] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
-      const [l, s, p, m, r] = await Promise.all([
+      const [m, v, p, rev, l, r] = await Promise.all([
+        supabase.from("memberships").select("*", { count: "exact", head: true }),
+        supabase.from("applications").select("*", { count: "exact", head: true }),
+        supabase.from("applications").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("applications").select("amount_paid").eq("status", "active"),
         supabase.from("leads").select("*", { count: "exact", head: true }),
-        supabase.from("services").select("*", { count: "exact", head: true }),
-        supabase.from("pages").select("*", { count: "exact", head: true }),
-        supabase.from("media").select("*", { count: "exact", head: true }),
-        supabase.from("leads").select("id,name,phone,service,created_at").order("created_at", { ascending: false }).limit(5),
+        supabase.from("applications").select("id,full_name,mobile,post,district,status,created_at").order("created_at", { ascending: false }).limit(5),
       ]);
-      setStats({ leads: l.count ?? 0, services: s.count ?? 0, pages: p.count ?? 0, media: m.count ?? 0 });
+      const revenue = (rev.data ?? []).reduce((s: number, x: any) => s + Number(x.amount_paid ?? 0), 0);
+      setStats({
+        members: m.count ?? 0,
+        volunteers: v.count ?? 0,
+        pending: p.count ?? 0,
+        revenue,
+        leads: l.count ?? 0,
+      });
       setRecent(r.data ?? []);
     })();
   }, []);
 
   const cards = [
-    { label: "Leads", value: stats.leads, icon: Inbox, to: "/admin/leads", color: "text-blue-600" },
-    { label: "Services", value: stats.services, icon: Wrench, to: "/admin/services", color: "text-green-600" },
-    { label: "Pages", value: stats.pages, icon: FileText, to: "/admin/pages", color: "text-amber-600" },
-    { label: "Media", value: stats.media, icon: ImageIcon, to: "/admin/media", color: "text-purple-600" },
+    { label: "Total Members", value: stats.members, icon: Users, to: "/admin/members", color: "text-blue-600" },
+    { label: "Total Volunteers", value: stats.volunteers, icon: UserCheck, to: "/admin/applications", color: "text-green-600" },
+    { label: "Pending Payments", value: stats.pending, icon: AlertCircle, to: "/admin/applications", color: "text-amber-600" },
+    { label: "Total Revenue", value: `₹${stats.revenue.toLocaleString("en-IN")}`, icon: IndianRupee, to: "/admin/applications", color: "text-emerald-600" },
   ];
 
   return (
@@ -52,20 +60,20 @@ export default function AdminDashboard() {
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle className="text-base">Recent leads</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2"><Inbox className="h-4 w-4" /> Recent applications</CardTitle>
         </CardHeader>
         <CardContent>
           {recent.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No leads yet.</p>
+            <p className="text-sm text-muted-foreground">No applications yet.</p>
           ) : (
             <ul className="divide-y">
               {recent.map((r) => (
-                <li key={r.id} className="py-2 flex items-center justify-between text-sm">
-                  <div>
-                    <div className="font-medium">{r.name}</div>
-                    <div className="text-xs text-muted-foreground">{r.phone} · {r.service}</div>
+                <li key={r.id} className="py-2 flex items-center justify-between text-sm gap-2">
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{r.full_name}</div>
+                    <div className="text-xs text-muted-foreground truncate">{r.post} · {r.district} · {r.mobile}</div>
                   </div>
-                  <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</div>
+                  <div className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</div>
                 </li>
               ))}
             </ul>
