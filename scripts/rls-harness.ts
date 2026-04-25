@@ -82,7 +82,7 @@ const baseAppRow = (overrides: Record<string, any> = {}) => ({
   district: "TestDistrict",
   block: "TestBlock",
   panchayat: "TestPanchayat",
-  post: "Volunteer",
+  post: "Panchayat Coordinator",
   transaction_id: `TXN-${RUN_ID}`,
   payment_screenshot_url: `https://example.com/${TAG}.png`,
   status: "pending",
