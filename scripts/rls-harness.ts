@@ -265,17 +265,95 @@ async function uploadReport(report: any, csv: string) {
     contentType: "text/csv",
     upsert: true,
   });
-  // Latest pointer
   const c = await admin.storage.from("documents").upload(`rls-reports/latest.json`, json, {
     contentType: "application/json",
     upsert: true,
   });
   if (a.error || b.error || c.error) {
     console.log("upload errors:", a.error?.message, b.error?.message, c.error?.message);
-  } else {
-    console.log(`📤 Uploaded report to documents/${base}/`);
+    return null;
   }
+  console.log(`📤 Uploaded report to documents/${base}/`);
+  return { folder: ts };
 }
+
+type DiffRow = {
+  status: "regression" | "fixed" | "still-failing" | "added" | "removed" | "unchanged";
+  flow: string; actor: string; expected: string;
+  base?: { actual: string; pass: boolean; policy?: string; error?: string };
+  head?: { actual: string; pass: boolean; policy?: string; error?: string };
+};
+
+const keyOf = (r: any) => `${r.flow}|${r.actor}|${r.expected}`;
+
+function computeDiff(base: any, head: any): DiffRow[] {
+  const baseMap = new Map(base.results.map((r: any) => [keyOf(r), r]));
+  const headMap = new Map(head.results.map((r: any) => [keyOf(r), r]));
+  const keys = new Set<string>([...baseMap.keys(), ...headMap.keys()]);
+  const out: DiffRow[] = [];
+  for (const k of keys) {
+    const b: any = baseMap.get(k);
+    const h: any = headMap.get(k);
+    const ref = h ?? b;
+    let status: DiffRow["status"];
+    if (b && !h) status = "removed";
+    else if (!b && h) status = "added";
+    else if (b.pass && !h.pass) status = "regression";
+    else if (!b.pass && h.pass) status = "fixed";
+    else if (!b.pass && !h.pass) status = "still-failing";
+    else status = "unchanged";
+    out.push({
+      status, flow: ref.flow, actor: ref.actor, expected: ref.expected,
+      base: b ? { actual: b.actual, pass: b.pass, policy: b.policy, error: b.error } : undefined,
+      head: h ? { actual: h.actual, pass: h.pass, policy: h.policy, error: h.error } : undefined,
+    });
+  }
+  return out;
+}
+
+async function maybeNotifyRegressions(currentReport: any, currentFolder: string) {
+  // Find previous run folder (skip the one we just uploaded)
+  const { data: list, error } = await admin.storage.from("documents").list("rls-reports", {
+    limit: 100, sortBy: { column: "name", order: "desc" },
+  });
+  if (error) { console.log("list previous runs failed:", error.message); return; }
+  const folders = (list ?? [])
+    .filter((e) => !e.name.endsWith(".json") && !e.name.endsWith(".csv") && e.name !== currentFolder)
+    .map((e) => e.name).sort().reverse();
+  const prev = folders[0];
+  if (!prev) { console.log("ℹ️  No previous run to diff against — skipping notification."); return; }
+
+  const url = admin.storage.from("documents").getPublicUrl(`rls-reports/${prev}/report.json`).data.publicUrl;
+  const res = await fetch(url + `?t=${Date.now()}`);
+  if (!res.ok) { console.log(`could not fetch previous report (${res.status})`); return; }
+  const prevReport = await res.json();
+
+  const diff = computeDiff(prevReport, currentReport);
+  const regressions = diff.filter((d) => d.status === "regression");
+  if (regressions.length === 0) {
+    console.log(`✅ No regressions vs previous run (${prevReport.run_id}).`);
+    return;
+  }
+  console.log(`⚠️  ${regressions.length} regression(s) vs ${prevReport.run_id} — notifying admins…`);
+
+  const fnUrl = `${URL}/functions/v1/notify-rls-regressions`;
+  const r = await fetch(fnUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE}` },
+    body: JSON.stringify({
+      base_run_id: prevReport.run_id,
+      head_run_id: currentReport.run_id,
+      base_generated_at: prevReport.generated_at,
+      head_generated_at: currentReport.generated_at,
+      diff,
+      triggered_by: "auto",
+    }),
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) console.log("notify failed:", r.status, body);
+  else console.log(`📧 notify-rls-regressions: sent=${body.sent ?? 0} regressions=${body.regressions ?? regressions.length}`);
+}
+
 
 async function finish() {
   // Cleanup: delete tagged rows + harness users
@@ -302,7 +380,11 @@ async function finish() {
     results,
   };
   const csv = toCsv(results);
-  await uploadReport(report, csv);
+  const uploaded = await uploadReport(report, csv);
+  if (uploaded) {
+    try { await maybeNotifyRegressions(report, uploaded.folder); }
+    catch (e: any) { console.log("notify error:", e?.message ?? e); }
+  }
 
   console.log(`\n— Summary — ${passed} passed, ${failed} failed (of ${results.length})`);
   if (failed > 0) {

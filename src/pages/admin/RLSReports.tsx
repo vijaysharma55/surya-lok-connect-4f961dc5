@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, RefreshCcw, Download, ShieldCheck, ShieldAlert,
-  ArrowDownCircle, ArrowUpCircle, MinusCircle, PlusCircle, CircleDot,
+  ArrowDownCircle, ArrowUpCircle, MinusCircle, PlusCircle, CircleDot, Mail,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -209,6 +209,38 @@ export default function RLSReportsPage() {
     downloadBlob(`rls-diff-${baseReport.run_id}-vs-${report.run_id}.csv`, new Blob([csv], { type: "text/csv" }));
   };
 
+  const [notifying, setNotifying] = useState(false);
+  const regressionCount = useMemo(
+    () => (diff ?? []).filter((d) => d.status === "regression").length,
+    [diff],
+  );
+  const notifyRegressions = async () => {
+    if (!diff || !baseReport || !report) return;
+    if (regressionCount === 0) {
+      toast.info("No regressions to notify about.");
+      return;
+    }
+    setNotifying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("notify-rls-regressions", {
+        body: {
+          base_run_id: baseReport.run_id,
+          head_run_id: report.run_id,
+          base_generated_at: baseReport.generated_at,
+          head_generated_at: report.generated_at,
+          diff,
+          triggered_by: "manual",
+        },
+      });
+      if (error) throw error;
+      toast.success(`Emailed ${data?.sent ?? 0} admin${data?.sent === 1 ? "" : "s"} about ${regressionCount} regression${regressionCount === 1 ? "" : "s"}.`);
+    } catch (e: any) {
+      toast.error(`Notify failed: ${e.message ?? e}`);
+    } finally {
+      setNotifying(false);
+    }
+  };
+
   return (
     <AdminLayout title="RLS Test Reports">
       <div className="space-y-4">
@@ -252,9 +284,21 @@ export default function RLSReportsPage() {
               <div className="flex items-center gap-2 ml-auto">
                 <Button variant="outline" size="sm" onClick={loadRuns} className="gap-2"><RefreshCcw className="h-4 w-4" /> Refresh</Button>
                 {compareMode ? (
-                  <Button variant="outline" size="sm" onClick={downloadDiffCsv} disabled={!diff} className="gap-2">
-                    <Download className="h-4 w-4" /> Diff CSV
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      onClick={notifyRegressions}
+                      disabled={!diff || regressionCount === 0 || notifying}
+                      variant={regressionCount > 0 ? "destructive" : "outline"}
+                      className="gap-2"
+                    >
+                      {notifying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                      Email regressions{regressionCount > 0 ? ` (${regressionCount})` : ""}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={downloadDiffCsv} disabled={!diff} className="gap-2">
+                      <Download className="h-4 w-4" /> Diff CSV
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button variant="outline" size="sm" onClick={downloadJSON} disabled={!report} className="gap-2"><Download className="h-4 w-4" /> JSON</Button>
