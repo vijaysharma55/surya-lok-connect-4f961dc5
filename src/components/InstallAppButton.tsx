@@ -50,6 +50,9 @@ export const InstallAppButton = ({
       setInstalled(true);
       setDeferred(null);
       localStorage.removeItem(DISMISS_KEY);
+      toast.success("App installed", {
+        description: "SLKF is now available from your home screen.",
+      });
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
