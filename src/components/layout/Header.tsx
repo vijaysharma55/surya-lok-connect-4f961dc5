@@ -31,7 +31,22 @@ export const Header = () => {
     : waLink("Hello SLKF, I'd like to know more about your services.");
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border shadow-card">
+    <>
+      {/* Minimal mobile top bar — logo only. Primary nav lives in MobileBottomNav. */}
+      <header className="md:hidden sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
+        <div className="container-tight flex items-center justify-center py-2.5">
+          <Link to="/" className="flex items-center gap-2">
+            {logoUrl ? (
+              <img src={logoUrl} alt={siteName} className="h-8 w-8 rounded object-contain" />
+            ) : (
+              <SunLogo size={32} />
+            )}
+            <span className="font-semibold text-foreground text-sm">{siteName}</span>
+          </Link>
+        </div>
+      </header>
+
+    <header className="hidden md:block sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border shadow-card">
       {/* Top trust strip */}
       <div className="hidden md:block bg-foreground text-background">
         <div className="container-tight flex items-center justify-between py-1.5 text-xs">
