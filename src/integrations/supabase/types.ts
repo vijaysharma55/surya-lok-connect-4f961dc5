@@ -92,6 +92,45 @@ export type Database = {
         }
         Relationships: []
       }
+      memberships: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          membership_type: string
+          notes: string | null
+          payment_status: string
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          membership_type?: string
+          notes?: string | null
+          payment_status?: string
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          membership_type?: string
+          notes?: string | null
+          payment_status?: string
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_sections: {
         Row: {
           body: string | null
