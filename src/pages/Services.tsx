@@ -24,6 +24,16 @@ const Services = () => {
         title="Services — CSR, Solar & Property"
         description="Explore SLKF's three core services: CSR project management, solar energy installations, and verified property buy/sell — all under one trusted roof."
         path="/services"
+        keywords={["CSR services Bihar", "solar installation Patna", "property dealer Patna", "NGO services", "SLKF services"]}
+        jsonLd={[
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Services", path: "/services" },
+          ]),
+          serviceJsonLd("CSR Project Management", "End-to-end CSR program design, implementation and reporting for corporates.", "/services/csr"),
+          serviceJsonLd("Solar Energy Solutions", "Rooftop and ground-mount solar installations for homes, businesses and institutions.", "/services/solar"),
+          serviceJsonLd("Property Services", "Verified buy, sell and rental property services across Bihar.", "/services/property"),
+        ]}
       />
 
       <section className="gradient-warm">
