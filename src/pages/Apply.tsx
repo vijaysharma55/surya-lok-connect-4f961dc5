@@ -304,14 +304,16 @@ export default function Apply() {
                     accept="image/*"
                     file={photoFile}
                     onChange={setPhotoFile}
-                    hint="JPG/PNG, under 5 MB."
+                    maxSizeMB={5}
+                    hint="JPG/PNG/WEBP, up to 5 MB."
                   />
                   <FileField
                     label="Aadhaar card image"
                     accept="image/*"
                     file={aadhaarFile}
                     onChange={setAadhaarFile}
-                    hint="Front side of Aadhaar. JPG/PNG, under 5 MB."
+                    maxSizeMB={5}
+                    hint="Front side of Aadhaar. JPG/PNG/WEBP, up to 5 MB."
                   />
                 </div>
               </div>
@@ -341,7 +343,8 @@ export default function Apply() {
                     accept="image/*"
                     file={screenshotFile}
                     onChange={setScreenshotFile}
-                    hint="Upload UPI/payment app screenshot"
+                    maxSizeMB={5}
+                    hint="UPI/payment app screenshot, up to 5 MB."
                   />
                 </div>
               </div>
@@ -393,14 +396,50 @@ export default function Apply() {
 }
 
 function FileField({
-  label, accept, file, onChange, hint,
+  label, accept, file, onChange, hint, maxSizeMB = 5,
 }: {
   label: string;
   accept: string;
   file: File | null;
   onChange: (f: File | null) => void;
   hint?: string;
+  maxSizeMB?: number;
 }) {
+  const acceptsImages = accept.includes("image");
+  const limitBytes = maxSizeMB * 1024 * 1024;
+
+  const formatSize = (bytes: number) =>
+    bytes >= 1024 * 1024
+      ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+      : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+
+  const handlePick = (f: File | undefined | null) => {
+    if (!f) { onChange(null); return; }
+
+    // Type check (only when caller restricts to images)
+    if (acceptsImages && !f.type.startsWith("image/")) {
+      toast.error(`${label}: please upload an image (JPG, PNG, WEBP).`);
+      return;
+    }
+
+    // Size check
+    if (f.size > limitBytes) {
+      toast.error(
+        `${label} is too large (${formatSize(f.size)}). Maximum allowed is ${maxSizeMB} MB.`,
+        { description: "Try compressing the image or taking a new photo." },
+      );
+      return;
+    }
+
+    if (f.size === 0) {
+      toast.error(`${label}: file is empty. Please pick a different file.`);
+      return;
+    }
+
+    onChange(f);
+    toast.success(`${label} added (${formatSize(f.size)}).`);
+  };
+
   return (
     <div>
       <Label className="block">{label}</Label>
@@ -410,16 +449,15 @@ function FileField({
           accept={accept}
           className="hidden"
           onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f && f.size > 5 * 1024 * 1024) {
-              toast.error("File must be under 5 MB");
-              return;
-            }
-            onChange(f ?? null);
+            handlePick(e.target.files?.[0]);
+            // Reset so picking the SAME file again still fires onChange
+            e.target.value = "";
           }}
         />
         <Upload className="h-4 w-4 text-muted-foreground shrink-0" />
-        <span className="text-sm truncate">{file ? file.name : "Choose file"}</span>
+        <span className="text-sm truncate">
+          {file ? `${file.name} · ${formatSize(file.size)}` : "Tap to upload"}
+        </span>
       </label>
       {hint && <p className="text-[11px] text-muted-foreground mt-1">{hint}</p>}
       {file && file.type.startsWith("image/") && (
