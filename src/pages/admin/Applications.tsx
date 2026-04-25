@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Search, Eye, Check, X, Trash2, FileSpreadsheet, Loader2, AlertTriangle, ScanLine, ZoomIn } from "lucide-react";
+import { maskAadhaar } from "@/lib/mask";
 
 const AADHAAR_REJECT_REASONS = [
   "Aadhaar image is blurry / unreadable",
@@ -330,7 +331,11 @@ export default function AdminApplications() {
                         )}
                       </TableCell>
                       <TableCell className="text-xs">{a.mobile}</TableCell>
-                      <TableCell className="font-mono text-xs">{a.aadhaar}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {isAdmin || coordinatorDistricts.includes(a.district)
+                          ? a.aadhaar
+                          : maskAadhaar(a.aadhaar)}
+                      </TableCell>
                       <TableCell className="text-xs">{a.post}</TableCell>
                       <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{a.district} › {a.block} › {a.panchayat}</TableCell>
                       <TableCell className={mismatch ? "text-destructive font-semibold whitespace-nowrap" : "whitespace-nowrap"}>
@@ -393,7 +398,7 @@ export default function AdminApplications() {
                 <Detail label="Name" value={viewing.full_name} />
                 <Detail label="Post" value={viewing.post} />
                 <Detail label="Mobile" value={viewing.mobile} />
-                <Detail label="Aadhaar" value={viewing.aadhaar} mono />
+                <Detail label="Aadhaar" value={isAdmin || coordinatorDistricts.includes(viewing.district) ? viewing.aadhaar : maskAadhaar(viewing.aadhaar)} mono />
                 <Detail label="Email" value={viewing.email ?? "—"} />
                 <Detail label="Location" value={`${viewing.district} › ${viewing.block} › ${viewing.panchayat}`} />
                 <Detail label="Txn ID" value={viewing.transaction_id} mono />
