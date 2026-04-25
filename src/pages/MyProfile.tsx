@@ -10,7 +10,8 @@ import { Clock, CheckCircle2, XCircle, IdCard, DownloadCloud, Loader2, LogOut, M
 import { toast } from "sonner";
 import { SunLogo } from "@/components/SunLogo";
 import { IDCard as IDCardTemplate } from "@/components/IDCard";
-import { generateIdCardPDF, safeFileName } from "@/lib/generatePDF";
+import { generateIdCardPDF, generateIdCardPNG, safeFileName } from "@/lib/generatePDF";
+import confetti from "canvas-confetti";
 import { maskAadhaar } from "@/lib/mask";
 
 type Application = {
@@ -29,7 +30,18 @@ type Application = {
   admin_notes: string | null;
   approved_at: string | null;
   created_at: string;
+  id_card_downloaded_at?: string | null;
 };
+
+function fireConfetti() {
+  const end = Date.now() + 800;
+  const colors = ["#f59e0b", "#ef4444", "#16a34a", "#ffffff"];
+  (function frame() {
+    confetti({ particleCount: 4, angle: 60, spread: 70, origin: { x: 0 }, colors });
+    confetti({ particleCount: 4, angle: 120, spread: 70, origin: { x: 1 }, colors });
+    if (Date.now() < end) requestAnimationFrame(frame);
+  })();
+}
 
 export default function MyProfile() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -45,7 +57,7 @@ export default function MyProfile() {
       const { data, error } = await supabase
         .from("applications")
         .select(
-          "id,application_code,full_name,mobile,aadhaar,email,district,block,panchayat,post,status,photo_url,admin_notes,approved_at,created_at",
+          "id,application_code,full_name,mobile,aadhaar,email,district,block,panchayat,post,status,photo_url,admin_notes,approved_at,created_at,id_card_downloaded_at",
         )
         .eq("claimed_by", user.id)
         .order("created_at", { ascending: false })
@@ -58,6 +70,15 @@ export default function MyProfile() {
     })();
     return () => { cancel = true; };
   }, [user, authLoading]);
+
+  const celebrated = useRef(false);
+  useEffect(() => {
+    if (!app || celebrated.current) return;
+    if ((app.status === "active" || app.status === "approved") && !app.id_card_downloaded_at) {
+      celebrated.current = true;
+      try { fireConfetti(); } catch { /* noop */ }
+    }
+  }, [app]);
 
   if (authLoading) return null;
   if (!user) return <Navigate to="/auth?redirect=/my-profile" replace />;
@@ -168,38 +189,66 @@ function StatusCard({ status, notes }: { status: string; notes: string | null })
 
 function VolunteerCard({ app }: { app: Application }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<"pdf" | "png" | null>(null);
 
-  const handleDownload = async () => {
+  const markFirstDownload = async () => {
+    if (app.id_card_downloaded_at) return;
+    await supabase
+      .from("applications")
+      .update({ id_card_downloaded_at: new Date().toISOString() })
+      .eq("id", app.id);
+    try { fireConfetti(); } catch { /* noop */ }
+  };
+
+  const handleDownload = async (kind: "pdf" | "png") => {
     if (!cardRef.current) return;
-    setDownloading(true);
+    setDownloading(kind);
     try {
-      await generateIdCardPDF(cardRef.current, safeFileName(app.full_name));
-      toast.success("ID Card Downloaded Successfully");
+      if (kind === "pdf") {
+        await generateIdCardPDF(cardRef.current, safeFileName(app.full_name, "pdf"));
+      } else {
+        await generateIdCardPNG(cardRef.current, safeFileName(app.full_name, "png"));
+      }
+      toast.success(`ID Card downloaded (${kind.toUpperCase()})`);
+      markFirstDownload();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to generate PDF");
+      toast.error("Failed to generate file");
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
   return (
     <>
-      <Button
-        onClick={handleDownload}
-        disabled={downloading}
-        aria-busy={downloading}
-        aria-live="polite"
-        className="w-full sm:w-auto gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-        size="lg"
-      >
-        {downloading ? (
-          <><Loader2 className="h-4 w-4 animate-spin" aria-hidden /><span>Generating PDF…</span></>
-        ) : (
-          <><DownloadCloud className="h-4 w-4" aria-hidden /><span>Download Volunteer ID (PDF)</span></>
-        )}
-      </Button>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Button
+          onClick={() => handleDownload("pdf")}
+          disabled={!!downloading}
+          aria-busy={downloading === "pdf"}
+          className="gap-2 disabled:opacity-70"
+          size="lg"
+        >
+          {downloading === "pdf" ? (
+            <><Loader2 className="h-4 w-4 animate-spin" aria-hidden /><span>Generating PDF…</span></>
+          ) : (
+            <><DownloadCloud className="h-4 w-4" aria-hidden /><span>Download ID (PDF)</span></>
+          )}
+        </Button>
+        <Button
+          onClick={() => handleDownload("png")}
+          disabled={!!downloading}
+          variant="outline"
+          className="gap-2 disabled:opacity-70"
+          size="lg"
+        >
+          {downloading === "png" ? (
+            <><Loader2 className="h-4 w-4 animate-spin" aria-hidden /><span>Generating PNG…</span></>
+          ) : (
+            <><DownloadCloud className="h-4 w-4" aria-hidden /><span>Download ID (PNG)</span></>
+          )}
+        </Button>
+      </div>
 
       <Card className="overflow-hidden border-2 border-primary/40 shadow-warm">
         <div className="bg-foreground text-background px-4 py-2 flex items-center justify-between">

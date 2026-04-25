@@ -22,16 +22,26 @@ export default function Verify() {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<VerifyData | null>(null);
+  const [rateLimited, setRateLimited] = useState(false);
 
   useEffect(() => {
     let cancel = false;
     (async () => {
       if (!id) { setLoading(false); return; }
-      const { data: row } = await supabase
-        .from("applications")
-        .select("application_code,full_name,post,district,status,photo_url,approved_at")
-        .eq("application_code", id)
-        .maybeSingle();
+
+      // Best-effort rate limit: 30 lookups / minute / id
+      const { data: rl } = await supabase.rpc("rate_limit_hit", {
+        p_key: `verify:${id}`,
+        p_max: 30,
+      });
+      const allowed = Array.isArray(rl) ? rl[0]?.allowed !== false : true;
+      if (!allowed) {
+        if (!cancel) { setRateLimited(true); setLoading(false); }
+        return;
+      }
+
+      const { data: rows } = await supabase.rpc("public_verify_id", { p_id: id });
+      const row = Array.isArray(rows) && rows.length ? rows[0] : null;
       if (!cancel) {
         setData((row as VerifyData) ?? null);
         setLoading(false);
@@ -76,6 +86,8 @@ export default function Verify() {
                 <Loader2 className="h-6 w-6 animate-spin" />
                 <span className="text-sm">Verifying ID…</span>
               </div>
+            ) : rateLimited ? (
+              <RateLimitedState />
             ) : !data ? (
               <NotFoundState code={id ?? ""} />
             ) : (
@@ -213,6 +225,23 @@ function NotFoundState({ code }: { code: string }) {
       <p className="text-xs text-muted-foreground">
         We couldn't find a volunteer with code <span className="font-mono">{code}</span>.
         Please re-scan the QR or contact our office.
+      </p>
+      <Button asChild variant="outline" size="sm">
+        <Link to="/">Back to home</Link>
+      </Button>
+    </div>
+  );
+}
+
+function RateLimitedState() {
+  return (
+    <div className="text-center py-6 space-y-3">
+      <div className="mx-auto h-12 w-12 rounded-full bg-yellow-500/15 text-yellow-700 flex items-center justify-center">
+        <Clock className="h-6 w-6" />
+      </div>
+      <div className="font-semibold text-foreground">Too many verification attempts</div>
+      <p className="text-xs text-muted-foreground">
+        For security, please wait a minute before scanning this ID again.
       </p>
       <Button asChild variant="outline" size="sm">
         <Link to="/">Back to home</Link>

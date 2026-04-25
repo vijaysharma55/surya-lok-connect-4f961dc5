@@ -164,6 +164,14 @@ export default function AdminApplications() {
     setBusyId(null);
     if (error) return toast.error(error.message);
     toast.success(`Application ${status}`);
+    if (status === "active") {
+      supabase.functions
+        .invoke("send-approval-email", { body: { applicationId: id } })
+        .then(({ error: e }) => {
+          if (e) toast.error(`Email not sent: ${e.message}`);
+          else toast.success("Approval email sent");
+        });
+    }
     setViewing(null);
     setAadhaarVerifying(null);
     setRejectMode(false);
@@ -176,10 +184,21 @@ export default function AdminApplications() {
     setBulkBusy(true);
     const patch: any = { status };
     if (status === "active") patch.approved_at = new Date().toISOString();
-    const { error } = await supabase.from("applications").update(patch).in("id", Array.from(selected));
+    const ids = Array.from(selected);
+    const { error } = await supabase.from("applications").update(patch).in("id", ids);
     setBulkBusy(false);
     if (error) return toast.error(error.message);
     toast.success(`${selected.size} record(s) ${status}`);
+    if (status === "active") {
+      Promise.all(
+        ids.map((id) =>
+          supabase.functions.invoke("send-approval-email", { body: { applicationId: id } }),
+        ),
+      ).then((results) => {
+        const failed = results.filter((r) => r.error).length;
+        if (failed) toast.error(`${failed} approval email(s) failed`);
+      });
+    }
     load();
   };
 
