@@ -20,8 +20,10 @@ import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Membership from "./pages/Membership";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
+import AdminMembers from "./pages/admin/Members";
 import AdminServices from "./pages/admin/Services";
 import AdminProjects from "./pages/admin/Projects";
 import AdminPages from "./pages/admin/Pages";
@@ -49,8 +51,11 @@ const Shell = () => {
           <Route path="/services/property" element={<ServiceProperty />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/membership" element={<Membership />} />
+          <Route path="/join-us" element={<Membership />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/members" element={<AdminMembers />} />
           <Route path="/admin/leads" element={<AdminLeads />} />
           <Route path="/admin/services" element={<AdminServices />} />
           <Route path="/admin/projects" element={<AdminProjects />} />

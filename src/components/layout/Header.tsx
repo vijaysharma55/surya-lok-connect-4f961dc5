@@ -105,6 +105,14 @@ export const Header = () => {
             asChild
             variant="outline"
             size="sm"
+            className="hidden md:inline-flex border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+          >
+            <Link to="/membership">Become a Member</Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
             className="hidden sm:inline-flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
           >
             <a href={telLink(phones[0])}>
