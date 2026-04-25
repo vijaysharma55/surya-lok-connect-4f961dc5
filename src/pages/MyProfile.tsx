@@ -124,7 +124,7 @@ export default function MyProfile() {
 }
 
 function StatusCard({ status, notes }: { status: string; notes: string | null }) {
-  if (status === "approved") {
+  if (status === "approved" || status === "active") {
     return (
       <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 flex items-start gap-3">
         <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
