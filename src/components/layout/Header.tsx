@@ -107,7 +107,7 @@ export const Header = () => {
             size="sm"
             className="hidden sm:inline-flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
           >
-            <a href={telLink()}>
+            <a href={telLink(phones[0])}>
               <Phone className="h-4 w-4" /> Call
             </a>
           </Button>
@@ -117,7 +117,7 @@ export const Header = () => {
             className="bg-secondary text-secondary-foreground hover:bg-[hsl(var(--secondary-hover))]"
           >
             <a
-              href={waLink("Hello SLKF, I'd like to know more about your services.")}
+              href={waHref}
               target="_blank"
               rel="noopener"
             >
@@ -171,23 +171,20 @@ export const Header = () => {
                 ))}
               </nav>
               <div className="mt-6 space-y-2 border-t border-border pt-4">
+                {phones.map((p) => (
+                  <a
+                    key={p}
+                    href={telLink(p)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent"
+                  >
+                    <Phone className="h-4 w-4 text-secondary" /> {p}
+                  </a>
+                ))}
                 <a
-                  href={telLink(SITE.phones[0])}
-                  className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent"
-                >
-                  <Phone className="h-4 w-4 text-secondary" /> {SITE.phones[0]}
-                </a>
-                <a
-                  href={telLink(SITE.phones[1])}
-                  className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent"
-                >
-                  <Phone className="h-4 w-4 text-secondary" /> {SITE.phones[1]}
-                </a>
-                <a
-                  href={`mailto:${SITE.email}`}
+                  href={`mailto:${email}`}
                   className="flex items-center gap-2 px-4 py-2 rounded-md text-sm hover:bg-accent break-all"
                 >
-                  {SITE.email}
+                  {email}
                 </a>
               </div>
             </SheetContent>
