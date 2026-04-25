@@ -22,7 +22,7 @@ export type SiteSettings = {
   cta_banner_text: string | null;
   cta_banner_link: string | null;
   social_links: Record<string, string>;
-  nav_links: { label: string; to: string }[];
+  nav_links: { label: string; to: string; href?: string }[];
   footer_text: string | null;
   compliance: string[];
 };
@@ -57,26 +57,54 @@ export type PageSection = {
   visible: boolean;
 };
 
+export type Project = {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  image_url: string | null;
+  sort_order: number;
+  published: boolean;
+};
+
+const normalizeSettings = (data: any): SiteSettings => {
+  const navRaw = Array.isArray(data.nav_links) ? data.nav_links : [];
+  return {
+    ...data,
+    phones: Array.isArray(data.phones) ? data.phones : [],
+    social_links: (data.social_links ?? {}) as Record<string, string>,
+    nav_links: navRaw.map((n: any) => ({
+      label: n.label,
+      to: n.to ?? n.href ?? "/",
+      href: n.href ?? n.to,
+    })),
+    compliance: Array.isArray(data.compliance) ? data.compliance : [],
+  };
+};
+
 export const useSiteSettings = () => {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   useEffect(() => {
     let cancelled = false;
-    supabase
-      .from("site_settings")
-      .select("*")
-      .eq("id", "global")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled || !data) return;
-        setSettings({
-          ...(data as any),
-          phones: Array.isArray((data as any).phones) ? (data as any).phones : [],
-          social_links: ((data as any).social_links ?? {}) as Record<string, string>,
-          nav_links: Array.isArray((data as any).nav_links) ? (data as any).nav_links : [],
-          compliance: Array.isArray((data as any).compliance) ? (data as any).compliance : [],
+    const fetch = () =>
+      supabase
+        .from("site_settings")
+        .select("*")
+        .eq("id", "global")
+        .maybeSingle()
+        .then(({ data }) => {
+          if (cancelled || !data) return;
+          setSettings(normalizeSettings(data));
         });
-      });
-    return () => { cancelled = true; };
+    fetch();
+    const channel = supabase
+      .channel("site_settings-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, () => fetch())
+      .subscribe();
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, []);
   return settings;
 };
@@ -85,37 +113,75 @@ export const usePublishedServices = () => {
   const [services, setServices] = useState<Service[] | null>(null);
   useEffect(() => {
     let cancelled = false;
-    supabase
-      .from("services")
-      .select("*")
-      .eq("published", true)
-      .order("sort_order")
-      .then(({ data }) => {
-        if (cancelled) return;
-        setServices(
-          ((data as any[]) ?? []).map((s) => ({
-            ...s,
-            benefits: Array.isArray(s.benefits) ? s.benefits : [],
-          }))
-        );
-      });
-    return () => { cancelled = true; };
+    const fetch = () =>
+      supabase
+        .from("services")
+        .select("*")
+        .eq("published", true)
+        .order("sort_order")
+        .then(({ data }) => {
+          if (cancelled) return;
+          setServices(
+            ((data as any[]) ?? []).map((s) => ({
+              ...s,
+              benefits: Array.isArray(s.benefits) ? s.benefits : [],
+            }))
+          );
+        });
+    fetch();
+    const channel = supabase
+      .channel("services-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "services" }, () => fetch())
+      .subscribe();
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, []);
   return services;
+};
+
+export const usePublishedProjects = () => {
+  const [projects, setProjects] = useState<Project[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const fetch = () =>
+      supabase
+        .from("projects")
+        .select("*")
+        .eq("published", true)
+        .order("sort_order")
+        .then(({ data }) => {
+          if (!cancelled) setProjects((data as Project[]) ?? []);
+        });
+    fetch();
+    const channel = supabase
+      .channel("projects-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => fetch())
+      .subscribe();
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+  return projects;
 };
 
 export const usePageSections = (slug: string) => {
   const [sections, setSections] = useState<PageSection[] | null>(null);
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const fetch = async () => {
       const { data: page } = await supabase
         .from("pages")
         .select("id")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
-      if (!page || cancelled) { setSections([]); return; }
+      if (!page || cancelled) {
+        if (!cancelled) setSections([]);
+        return;
+      }
       const { data } = await supabase
         .from("page_sections")
         .select("*")
@@ -123,8 +189,16 @@ export const usePageSections = (slug: string) => {
         .eq("visible", true)
         .order("sort_order");
       if (!cancelled) setSections((data as PageSection[]) ?? []);
-    })();
-    return () => { cancelled = true; };
+    };
+    fetch();
+    const channel = supabase
+      .channel(`page_sections-${slug}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "page_sections" }, () => fetch())
+      .subscribe();
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, [slug]);
   return sections;
 };

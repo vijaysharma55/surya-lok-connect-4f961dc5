@@ -25,10 +25,10 @@ export default function AdminSettings() {
     update({ social_links: { ...(s.social_links ?? {}), [k]: v } });
 
   const save = async () => {
-    const { id, ...rest } = s;
-    const { error } = await supabase.from("site_settings").update(rest).eq("id", "global");
+    const payload = { ...s, id: "global" };
+    const { error } = await supabase.from("site_settings").upsert(payload, { onConflict: "id" });
     if (error) return toast.error(error.message);
-    toast.success("Saved");
+    toast.success("Settings saved");
   };
 
   const social = s.social_links ?? {};
