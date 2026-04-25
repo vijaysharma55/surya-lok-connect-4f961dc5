@@ -380,7 +380,11 @@ async function finish() {
     results,
   };
   const csv = toCsv(results);
-  await uploadReport(report, csv);
+  const uploaded = await uploadReport(report, csv);
+  if (uploaded) {
+    try { await maybeNotifyRegressions(report, uploaded.folder); }
+    catch (e: any) { console.log("notify error:", e?.message ?? e); }
+  }
 
   console.log(`\n— Summary — ${passed} passed, ${failed} failed (of ${results.length})`);
   if (failed > 0) {
