@@ -89,6 +89,41 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          created_at: string
+          district_id: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          district_id: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          district_id?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coordinator_assignments: {
         Row: {
           block: string | null
@@ -113,6 +148,30 @@ export type Database = {
           id?: string
           panchayat?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      districts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -378,6 +437,41 @@ export type Database = {
         }
         Relationships: []
       }
+      panchayats: {
+        Row: {
+          block_id: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          block_id: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          block_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "panchayats_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -435,6 +529,54 @@ export type Database = {
           sort_order?: number
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          hits: number
+          key: string
+          window_start: string
+        }
+        Insert: {
+          hits?: number
+          key: string
+          window_start?: string
+        }
+        Update: {
+          hits?: number
+          key?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      roles: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          label: string
+          level: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label: string
+          level?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label?: string
+          level?: string
+          name?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -660,6 +802,116 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          aadhaar: string | null
+          aadhaar_image_url: string | null
+          admin_notes: string | null
+          amount_paid: number
+          application_code: string | null
+          approved_at: string | null
+          auth_user_id: string | null
+          block_id: string | null
+          created_at: string
+          district_id: string | null
+          email: string | null
+          expected_amount: number
+          id: string
+          mobile: string
+          name: string
+          panchayat_id: string | null
+          payment_screenshot_url: string | null
+          payment_status: string
+          photo_url: string | null
+          processed_by: string | null
+          role_id: string | null
+          status: Database["public"]["Enums"]["verification_status"]
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          aadhaar?: string | null
+          aadhaar_image_url?: string | null
+          admin_notes?: string | null
+          amount_paid?: number
+          application_code?: string | null
+          approved_at?: string | null
+          auth_user_id?: string | null
+          block_id?: string | null
+          created_at?: string
+          district_id?: string | null
+          email?: string | null
+          expected_amount?: number
+          id?: string
+          mobile: string
+          name: string
+          panchayat_id?: string | null
+          payment_screenshot_url?: string | null
+          payment_status?: string
+          photo_url?: string | null
+          processed_by?: string | null
+          role_id?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aadhaar?: string | null
+          aadhaar_image_url?: string | null
+          admin_notes?: string | null
+          amount_paid?: number
+          application_code?: string | null
+          approved_at?: string | null
+          auth_user_id?: string | null
+          block_id?: string | null
+          created_at?: string
+          district_id?: string | null
+          email?: string | null
+          expected_amount?: number
+          id?: string
+          mobile?: string
+          name?: string
+          panchayat_id?: string | null
+          payment_screenshot_url?: string | null
+          payment_status?: string
+          photo_url?: string | null
+          processed_by?: string | null
+          role_id?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_panchayat_id_fkey"
+            columns: ["panchayat_id"]
+            isOneToOne: false
+            referencedRelation: "panchayats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -677,9 +929,22 @@ export type Database = {
         Args: { _district: string; _user_id: string }
         Returns: boolean
       }
+      public_get_status: {
+        Args: { p_mobile: string }
+        Returns: {
+          application_code: string
+          approved_at: string
+          created_at: string
+          district_name: string
+          name: string
+          role_label: string
+          status: Database["public"]["Enums"]["verification_status"]
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "editor" | "user"
+      verification_status: "pending" | "verified" | "active" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -808,6 +1073,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "user"],
+      verification_status: ["pending", "verified", "active", "rejected"],
     },
   },
 } as const
