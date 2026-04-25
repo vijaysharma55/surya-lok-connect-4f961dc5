@@ -489,25 +489,31 @@ export default function AdminApplications() {
                 />
               </div>
 
-              <div>
-                <div className="text-xs text-muted-foreground mb-1 flex items-center justify-between">
-                  <span>Uploaded Aadhaar image</span>
-                  {aadhaarVerifying.aadhaar_image_url && (
-                    <button type="button" onClick={() => setZoomImg(aadhaarVerifying.aadhaar_image_url!)} className="text-blue-600 inline-flex items-center gap-1 hover:underline">
-                      <ZoomIn className="h-3 w-3" /> Zoom
-                    </button>
+              {(isAdmin || coordinatorDistricts.includes(aadhaarVerifying.district)) ? (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1 flex items-center justify-between">
+                    <span>Uploaded Aadhaar image</span>
+                    {aadhaarVerifying.aadhaar_image_url && (
+                      <button type="button" onClick={() => setZoomImg(aadhaarVerifying.aadhaar_image_url!)} className="text-blue-600 inline-flex items-center gap-1 hover:underline">
+                        <ZoomIn className="h-3 w-3" /> Zoom
+                      </button>
+                    )}
+                  </div>
+                  {aadhaarVerifying.aadhaar_image_url ? (
+                    <a href={aadhaarVerifying.aadhaar_image_url} target="_blank" rel="noopener" className="block">
+                      <img loading="lazy" src={aadhaarVerifying.aadhaar_image_url} alt="Aadhaar document" className="rounded border max-h-96 w-full object-contain bg-muted" />
+                    </a>
+                  ) : (
+                    <div className="rounded border bg-muted p-8 text-center text-xs text-muted-foreground">
+                      No Aadhaar image uploaded by applicant.
+                    </div>
                   )}
                 </div>
-                {aadhaarVerifying.aadhaar_image_url ? (
-                  <a href={aadhaarVerifying.aadhaar_image_url} target="_blank" rel="noopener" className="block">
-                    <img loading="lazy" src={aadhaarVerifying.aadhaar_image_url} alt="Aadhaar document" className="rounded border max-h-96 w-full object-contain bg-muted" />
-                  </a>
-                ) : (
-                  <div className="rounded border bg-muted p-8 text-center text-xs text-muted-foreground">
-                    No Aadhaar image uploaded by applicant.
-                  </div>
-                )}
-              </div>
+              ) : (
+                <div className="rounded border bg-muted/40 p-6 text-center text-xs text-muted-foreground">
+                  Aadhaar image is restricted to admins and the assigned district coordinator.
+                </div>
+              )}
 
               {rejectMode ? (
                 <div className="space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
