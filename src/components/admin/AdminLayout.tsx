@@ -13,6 +13,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { RoleDebugPanel } from "@/components/admin/RoleDebugPanel";
 import { Button } from "@/components/ui/button";
 import { Seo } from "@/components/Seo";
 import { cn } from "@/lib/utils";
