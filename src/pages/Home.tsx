@@ -88,6 +88,17 @@ const Home = () => {
                 size="lg"
                 className="bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))] font-semibold shadow-warm"
               >
+                <Link to="/apply">
+                  <HandHeart className="h-4 w-4" />
+                  <span className="font-hindi">Become a Volunteer</span>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="bg-white/10 border-white text-white hover:bg-white hover:text-foreground backdrop-blur"
+              >
                 <Link to={heroCtaLink || "/contact"}>
                   <span className="font-hindi">{heroCtaLabel || "हमसे जुड़ें"}</span>
                   <ArrowRight className="h-4 w-4" />

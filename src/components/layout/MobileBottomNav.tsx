@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, Briefcase, UserPlus, LogIn, Shield } from "lucide-react";
+import { Home, Briefcase, UserPlus, LogIn, Shield, IdCard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
@@ -12,8 +12,8 @@ type Item = {
 
 const baseItems: Item[] = [
   { to: "/", label: "Home", icon: Home },
-  { to: "/services", label: "Services", icon: Briefcase, matchPaths: ["/services"] },
-  { to: "/membership", label: "Join Us", icon: UserPlus, matchPaths: ["/membership", "/join-us"] },
+  { to: "/apply", label: "Volunteer", icon: UserPlus, matchPaths: ["/apply"] },
+  { to: "/my-profile", label: "My ID", icon: IdCard, matchPaths: ["/my-profile"] },
 ];
 
 export const MobileBottomNav = () => {
