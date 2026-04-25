@@ -30,6 +30,7 @@ export type Database = {
           expected_amount: number
           full_name: string
           id: string
+          id_card_downloaded_at: string | null
           mobile: string
           panchayat: string
           payment_amount: number
@@ -55,6 +56,7 @@ export type Database = {
           expected_amount?: number
           full_name: string
           id?: string
+          id_card_downloaded_at?: string | null
           mobile: string
           panchayat: string
           payment_amount?: number
@@ -80,6 +82,7 @@ export type Database = {
           expected_amount?: number
           full_name?: string
           id?: string
+          id_card_downloaded_at?: string | null
           mobile?: string
           panchayat?: string
           payment_amount?: number
@@ -975,6 +978,26 @@ export type Database = {
           name: string
           role_label: string
           status: Database["public"]["Enums"]["verification_status"]
+        }[]
+      }
+      public_verify_id: {
+        Args: { p_id: string }
+        Returns: {
+          application_code: string
+          approved_at: string
+          district: string
+          full_name: string
+          photo_url: string
+          post: string
+          status: string
+        }[]
+      }
+      rate_limit_hit: {
+        Args: { p_key: string; p_max?: number }
+        Returns: {
+          allowed: boolean
+          hits: number
+          retry_after_seconds: number
         }[]
       }
     }
