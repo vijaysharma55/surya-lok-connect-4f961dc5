@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/useCms";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 const defaultNav = [
   { to: "/", label: "Home" },
