@@ -80,6 +80,7 @@ const Shell = () => {
           <Route path="/admin/seo" element={<AdminSeo />} />
           <Route path="/admin/header-footer" element={<AdminHeaderFooter />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/documents" element={<AdminDocuments />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
