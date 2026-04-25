@@ -24,6 +24,7 @@ import Auth from "./pages/Auth";
 import Membership from "./pages/Membership";
 import Apply from "./pages/Apply";
 import MyProfile from "./pages/MyProfile";
+import Verify from "./pages/Verify";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminLeads from "./pages/admin/Leads";
 import AdminMembers from "./pages/admin/Members";
@@ -60,6 +61,7 @@ const Shell = () => {
           <Route path="/join-us" element={<Membership />} />
           <Route path="/apply" element={<Apply />} />
           <Route path="/my-profile" element={<MyProfile />} />
+          <Route path="/verify/:id" element={<Verify />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/members" element={<AdminMembers />} />
