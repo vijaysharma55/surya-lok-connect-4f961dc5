@@ -345,8 +345,11 @@ export default function AdminApplications() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => { setViewing(a); setNotes(a.admin_notes ?? ""); }}>
+                          <Button variant="ghost" size="sm" title="View" onClick={() => { setViewing(a); setNotes(a.admin_notes ?? ""); }}>
                             <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" title="Verify Aadhaar" onClick={() => { setAadhaarVerifying(a); setNotes(a.admin_notes ?? ""); setRejectReason(""); setRejectMode(false); }}>
+                            <ScanLine className="h-4 w-4 text-blue-600" />
                           </Button>
                           <Button variant="ghost" size="sm" disabled={busyId === a.id} onClick={() => updateStatus(a.id, "active")}>
                             <Check className="h-4 w-4 text-green-600" />
