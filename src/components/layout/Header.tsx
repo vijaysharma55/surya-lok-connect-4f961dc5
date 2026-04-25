@@ -36,7 +36,7 @@ export const Header = () => {
       <div className="hidden md:block bg-foreground text-background">
         <div className="container-tight flex items-center justify-between py-1.5 text-xs">
           <div className="flex items-center gap-3">
-            {SITE.compliance.map((c) => (
+            {compliance.map((c) => (
               <span
                 key={c}
                 className="rounded-sm bg-primary/20 px-2 py-0.5 font-medium text-primary"
@@ -48,16 +48,16 @@ export const Header = () => {
           </div>
           <div className="flex items-center gap-4">
             <a
-              href={telLink()}
+              href={telLink(phones[0])}
               className="flex items-center gap-1.5 hover:text-primary transition"
             >
-              <Phone className="h-3.5 w-3.5" /> {SITE.phones[0]} / {SITE.phones[1]}
+              <Phone className="h-3.5 w-3.5" /> {phones[0]}{phones[1] ? ` / ${phones[1]}` : ""}
             </a>
             <a
-              href={`mailto:${SITE.email}`}
+              href={`mailto:${email}`}
               className="hover:text-primary transition"
             >
-              {SITE.email}
+              {email}
             </a>
           </div>
         </div>
@@ -66,13 +66,17 @@ export const Header = () => {
       {/* Main bar */}
       <div className="container-tight flex items-center justify-between py-3">
         <Link to="/" className="flex items-center gap-3 group">
-          <SunLogo size={42} className="transition-transform group-hover:rotate-45 duration-500" />
+          {logoUrl ? (
+            <img src={logoUrl} alt={siteName} className="h-10 w-10 rounded object-contain" />
+          ) : (
+            <SunLogo size={42} className="transition-transform group-hover:rotate-45 duration-500" />
+          )}
           <div className="leading-tight">
             <div className="font-semibold text-base sm:text-lg text-foreground">
-              Surya Lok Kalyan Foundation
+              {siteName}
             </div>
             <div className="text-[11px] sm:text-xs text-muted-foreground font-medium">
-              CSR • Solar • Property — Mithapur, Patna
+              {tagline}
             </div>
           </div>
         </Link>
