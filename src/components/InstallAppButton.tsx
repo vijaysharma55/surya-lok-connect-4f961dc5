@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Download, Share, Plus, MoreVertical } from "lucide-react";
+import { Download, Share, Plus, MoreVertical, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const DISMISS_KEY = "slkf_install_dismissed_at";
+const INSTALLED_KEY = "slkf_app_installed";
 const DISMISS_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 type Platform = "ios-safari" | "android-firefox" | "desktop-safari" | "other";
