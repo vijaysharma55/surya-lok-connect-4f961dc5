@@ -47,7 +47,8 @@ const allItems = [
 
 function AdminSidebar() {
   const location = useLocation();
-  const { signOut, user } = useAuth();
+  const { signOut, user, isAdmin } = useAuth();
+  const items = allItems.filter((i) => isAdmin || !i.adminOnly);
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
