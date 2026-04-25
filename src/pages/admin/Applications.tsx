@@ -88,6 +88,10 @@ export default function AdminApplications() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewing, setViewing] = useState<Application | null>(null);
   const [notes, setNotes] = useState("");
+  const [aadhaarVerifying, setAadhaarVerifying] = useState<Application | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectMode, setRejectMode] = useState(false);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [districts, setDistricts] = useState<string[]>([]);
   const debouncedQ = useDebounced(q);
