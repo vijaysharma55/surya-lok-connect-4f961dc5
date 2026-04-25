@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +50,9 @@ export const InstallAppButton = ({
       setInstalled(true);
       setDeferred(null);
       localStorage.removeItem(DISMISS_KEY);
+      toast.success("App installed", {
+        description: "SLKF is now available from your home screen.",
+      });
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
@@ -65,12 +69,21 @@ export const InstallAppButton = ({
     try {
       await deferred.prompt();
       const choice = await deferred.userChoice;
-      if (choice.outcome === "dismissed") {
+      if (choice.outcome === "accepted") {
+        toast.success("Installing app…", {
+          description: "Hang tight — SLKF will appear on your home screen shortly.",
+        });
+      } else {
         localStorage.setItem(DISMISS_KEY, String(Date.now()));
         setHidden(true);
+        toast("Install cancelled", {
+          description: "You can install the app anytime from the menu.",
+        });
       }
     } catch {
-      // No-op: prompt() can throw if called twice
+      toast.error("Couldn't open install prompt", {
+        description: "Please try again from your browser menu.",
+      });
     } finally {
       setDeferred(null);
     }
