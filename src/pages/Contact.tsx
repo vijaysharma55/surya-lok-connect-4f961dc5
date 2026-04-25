@@ -11,6 +11,14 @@ const Contact = () => (
       title="Contact SLKF — Mithapur, Patna"
       description="Reach Surya Lok Kalyan Foundation in Mithapur, Patna. Call 7520585153 or 7319935455, WhatsApp us, or email slkf02026@gmail.com."
       path="/contact"
+      keywords={["Contact SLKF", "NGO contact Patna", "SLKF phone", "SLKF email", "Mithapur Patna NGO"]}
+      jsonLd={[
+        contactPageJsonLd(),
+        breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Contact", path: "/contact" },
+        ]),
+      ]}
     />
 
     <section className="gradient-warm">
