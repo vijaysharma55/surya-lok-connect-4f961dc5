@@ -61,9 +61,20 @@ export const InstallAppButton = ({
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone === true;
-    if (standalone) {
+    const persisted = localStorage.getItem(INSTALLED_KEY) === "1";
+    if (standalone || persisted) {
       setInstalled(true);
-      return;
+      if (standalone && !persisted) localStorage.setItem(INSTALLED_KEY, "1");
+      // Listen for uninstall (display-mode flips back to browser)
+      const mql = window.matchMedia?.("(display-mode: standalone)");
+      const onChange = (e: MediaQueryListEvent) => {
+        if (!e.matches) {
+          localStorage.removeItem(INSTALLED_KEY);
+          setInstalled(false);
+        }
+      };
+      mql?.addEventListener?.("change", onChange);
+      return () => mql?.removeEventListener?.("change", onChange);
     }
 
     const dismissedAt = Number(localStorage.getItem(DISMISS_KEY) || 0);
@@ -76,10 +87,11 @@ export const InstallAppButton = ({
       setDeferred(e as BeforeInstallPromptEvent);
     };
     const onInstalled = () => {
+      localStorage.setItem(INSTALLED_KEY, "1");
+      localStorage.removeItem(DISMISS_KEY);
       setInstalled(true);
       setDeferred(null);
       setShowGuide(false);
-      localStorage.removeItem(DISMISS_KEY);
       toast.success("App installed", {
         description: "SLKF is now available from your home screen.",
       });
@@ -93,7 +105,26 @@ export const InstallAppButton = ({
     };
   }, []);
 
-  if (installed || hidden) return null;
+  // Render an "Installed" pill instead of hiding when installed
+  if (installed) {
+    return (
+      <Button
+        variant="outline"
+        size={size}
+        disabled
+        className={cn(
+          "gap-2 cursor-default border-emerald-500/40 text-emerald-600 dark:text-emerald-400",
+          className
+        )}
+        aria-label="App installed"
+      >
+        <CheckCircle2 className="h-4 w-4" />
+        Installed
+      </Button>
+    );
+  }
+
+  if (hidden) return null;
   // Show button when we have a native prompt OR we can guide a manual install
   if (!deferred && !needsManualGuide) return null;
 
